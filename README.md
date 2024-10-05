@@ -5,6 +5,7 @@ A new Flutter project.
 ## Project structure (credit: https://github.com/JCKodel/eva)
 ```
 📁 lib
+├─ 📁 assets
 ├─ 📁 app
 │  ├─ 📁 contracts (interfaces)
 │  ├─ 📁 domain
@@ -28,11 +29,11 @@ A new Flutter project.
 
 ## Sub-task
  - [ ]	Main screen with bottom navigation bar
- - [ ]	Main screen 1: Waiter basic info (name, role; check attendance)
+ - [ ]	Main screen 1: Waiter basic info (name, role; attendance status and check attendance)
  - [ ]	Main screen 2: Load current orders from tables
  - [ ]	Main screen 3: Settings
 
 ## Misc. task:
  - [ ]	Get location of user via GPS or network
- - [ ]	Receive notification using Firebase Cloud Message
+ - [X]	Receive notification using Firebase Cloud Message (current nitpick bug: notification while app is running in background or terminated not pop down from status bar)
  - [ ]	Access camera for scanning QR

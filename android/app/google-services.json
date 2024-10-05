@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "213725885966",
+    "firebase_url": "https://fov-fall2024-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fov-fall2024",
+    "storage_bucket": "fov-fall2024.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213725885966:android:06b58aa612511e0e6e2e5f",
+        "android_client_info": {
+          "package_name": "com.company.fov"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbRVBgSmhhyX0fEcOTrz112irFeJ8mLvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213725885966:android:0aed7b9e2ce6e64b6e2e5f",
+        "android_client_info": {
+          "package_name": "com.fov.waiter_mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbRVBgSmhhyX0fEcOTrz112irFeJ8mLvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
