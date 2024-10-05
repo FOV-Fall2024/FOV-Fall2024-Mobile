@@ -7,7 +7,6 @@ import 'package:fov_fall2024_waiter_mobile_app/app/permissions/permission.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/push_notification_service.dart';
 
-PermissionMethods permissionMethods = PermissionMethods();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 //listen to background changes
@@ -21,7 +20,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await Firebase.initializeApp();
-  permissionMethods.askNotificationPermission();
   PushNotificationService().generateDeviceRecogitionToken();
   await PushNotificationService.localNotiInit();
 

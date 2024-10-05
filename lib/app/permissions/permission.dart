@@ -12,14 +12,4 @@ class PermissionMethods
       }
     });
   }
-  askNotificationPermission() async
-  {
-    await Permission.notification.isDenied.then((value)
-    {
-      if(value)
-      {
-        Permission.notification.request();
-      }
-    });
-  }
 }
