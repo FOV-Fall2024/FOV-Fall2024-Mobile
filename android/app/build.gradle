@@ -11,6 +11,7 @@ dependencies {
 }
 
 android {
+    compileSdkVersion 31
     namespace = "com.fov.waiter_mobile_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion

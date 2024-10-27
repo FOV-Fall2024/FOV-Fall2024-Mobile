@@ -28,7 +28,7 @@ A new Flutter project.
  - [ ]	Scan QR + get location to check attendance;
 
 ## Sub-task
- - [ ]	Main screen with bottom navigation bar
+ - [X]	Main screen with bottom navigation bar
  - [ ]	Main screen 1: Waiter basic info (name, role; attendance status and check attendance)
  - [ ]	Main screen 2: Load current orders from tables
  - [ ]	Main screen 3: Settings

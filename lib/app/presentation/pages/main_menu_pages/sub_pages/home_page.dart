@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/test_pages/location_page.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/setting_page.dart';
 import 'package:intl/intl.dart';
-import 'dart:async'; // Import for Timer
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   @override
@@ -33,6 +36,13 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void _onContainerTapped() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SettingPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,37 +54,60 @@ class _HomePageState extends State<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: AssetImage('avatar.png')
-                    ),
-                    SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'John Doe',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _onContainerTapped,
+                    child: Container(
+                      padding: EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
                           ),
-                        ),
-                        Text(
-                          'Waiter',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundImage: AssetImage('avatar.png'),
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'John Doe',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Waiter',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
+                SizedBox(width: 100),
+                // Bell Icon
                 IconButton(
                   icon: Icon(Icons.notifications),
                   onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.notification);
                   },
                 ),
               ],
@@ -91,8 +124,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   SizedBox(height: 30),
-
-                  // Attendance Status
                   Text(
                     'Attendance Status: ${_isChecked ? "Checked" : "Not Yet"}',
                     style: TextStyle(
@@ -102,27 +133,27 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   SizedBox(height: 30),
-
-                  // Take Attendance button
                   ElevatedButton(
                     onPressed: _isChecked
                         ? null
                         : () {
-                      setState(() {
-                        _isChecked = true;
-                      });
-                    },
+                            setState(() {
+                              _isChecked = true;
+                            });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LocationPage()));
+                          },
                     child: Text(
                       'Take Attendance',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       padding: EdgeInsets.all(80),
-                      backgroundColor: _isChecked ? Colors.grey : Colors.lightBlue,
+                      backgroundColor:
+                          _isChecked ? Colors.grey : Colors.lightBlue,
                     ),
                   ),
                 ],

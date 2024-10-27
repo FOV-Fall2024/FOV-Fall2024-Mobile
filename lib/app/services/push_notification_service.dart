@@ -35,13 +35,10 @@ class PushNotificationService {
     DarwinInitializationSettings(
       onDidReceiveLocalNotification: (id, title, body, payload) => null,
     );
-    final LinuxInitializationSettings initializationSettingsLinux =
-    LinuxInitializationSettings(defaultActionName: 'Open notification');
     final InitializationSettings initializationSettings =
     InitializationSettings(
         android: initializationSettingsAndroid,
-        iOS: initializationSettingsDarwin,
-        linux: initializationSettingsLinux);
+        iOS: initializationSettingsDarwin);
 
     // request notification permissions for android 13 or above
     _flutterLocalNotificationsPlugin
