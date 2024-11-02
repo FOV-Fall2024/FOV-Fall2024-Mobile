@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -7,56 +8,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController securityCodeController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
+  final AuthRepository authRepository = AuthRepository();
   bool _isLoading = false;
   bool _rememberMe = false;
 
-  //Fake login
   void _login() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await Future.delayed(Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (_emailController.text == "waiter@gmail.com" &&
-        _passwordController.text == "12345") {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Login Successful"),
-          content: Text("Welcome, ${_emailController.text}!"),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
+    String securityCode = securityCodeController.text;
+    String password = passwordController.text;
+    Map<String, dynamic>? userData =
+        await authRepository.login(securityCode, password);
+    if (userData['success'] == true) {
+      Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login successfully.'),
         ),
       );
-      Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Login Failed"),
-          content: Text("Incorrect email or password."),
-          actions: [
-            TextButton(
-              child: Text("Retry"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to sign in. Please try again.'),
         ),
       );
     }
@@ -65,8 +39,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset :false,
-        body: Padding(
+      resizeToAvoidBottomInset: false,
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -82,18 +56,17 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 80),
             Text(
-              "Email Address",
+              "Waiter code",
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 8),
             TextField(
-              controller: _emailController,
+              controller: securityCodeController,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20)
-                ),
-                hintText: 'Enter your email address',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                hintText: 'Enter your waiter code',
               ),
             ),
             SizedBox(height: 20),
@@ -103,13 +76,12 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 8),
             TextField(
-              controller: _passwordController,
+              controller: passwordController,
               obscureText: true,
               focusNode: _passwordFocusNode,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20)
-                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                 hintText: 'Enter your password',
               ),
             ),
@@ -131,16 +103,17 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : ElevatedButton(
-              onPressed: _login,
-              child: Text("Login",
-                style: TextStyle(color: Colors.white,)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 202, 156, 94),
-                padding: EdgeInsets.symmetric(vertical: 15),
-                textStyle: TextStyle(fontSize: 18),
-                minimumSize: Size.fromHeight(40)
-              ),
-            ),
+                    onPressed: _login,
+                    child: Text("Login",
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 202, 156, 94),
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        textStyle: TextStyle(fontSize: 18),
+                        minimumSize: Size.fromHeight(40)),
+                  ),
           ],
         ),
       ),
@@ -149,8 +122,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    securityCodeController.dispose();
+    passwordController.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }

@@ -3,7 +3,7 @@ import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart
 import 'package:http/http.dart' as http;
 
 class AuthRepository {
-  final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth/';
+  final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final StorageService _storageService = StorageService();
   final String _tokenKey = 'auth_token';
 
@@ -19,13 +19,19 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        if (responseData['token'] != null) {
-          await _storageService.write(_tokenKey, responseData['token']);
+        if (responseData['reasonStatusCode'] == 'Success') {
+          print(responseData['metadata']['accessToken']);
+          await _storageService.write(
+              _tokenKey, responseData['metadata']['accessToken']);
+          return {'success': true, 'data': responseData};
         }
-
-        return responseData;
+        return {'success': false, 'error': 'Invalid token received'};
       } else {
-        return {'error': 'Failed to login', 'statusCode': response.statusCode};
+        return {
+          'success': false,
+          'error': 'Failed to login',
+          'statusCode': response.statusCode
+        };
       }
     } catch (e) {
       return {'error': 'An error occurred: $e'};

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_table_detail.dart'; // Import the detail page
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/orderItem.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_detail_page.dart'; // Import the detail page
 
 class OrderPage extends StatefulWidget {
   @override
@@ -7,24 +9,32 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  List<OrderItem> orders = [
-    OrderItem(tableId: 'Table 1', status: 'ordering'),
-    OrderItem(tableId: 'Table 2', status: 'waiting for food'),
-    OrderItem(tableId: 'Table 3', status: 'awaiting payment'),
-    OrderItem(tableId: 'Table 4', status: 'done'),
-  ];
+  final OrderRepository orderRepository = OrderRepository();
+  late Future<List<OrderItem>> orders;
 
-  // Sample method to get color based on status
+  void initState() {
+    super.initState();
+    orders = orderRepository.getOrders();
+  }
+
+  void getOrder() async {
+    orders = orderRepository.getOrders();
+  }
+
   Color getStatusColor(String status) {
     switch (status) {
-      case 'ordering':
-        return Colors.red;
-      case 'waiting for food':
-        return Colors.cyan;
-      case 'awaiting payment':
-        return Colors.orange;
-      case 'done':
-        return Colors.green;
+      case 'Prepare':
+        return Colors.black;
+      case 'Cook':
+        return Colors.black;
+      case 'Service':
+        return Colors.black;
+      case 'Payment':
+        return Colors.black;
+      case 'Finish':
+        return Colors.black;
+      case 'Canceled':
+        return Colors.black;
       default:
         return Colors.black;
     }
@@ -46,10 +56,13 @@ class _OrderPageState extends State<OrderPage> {
                 DropdownButton<String>(
                   items: [
                     DropdownMenuItem(value: 'all', child: Text('All')),
-                    DropdownMenuItem(value: 'ordering', child: Text('Ordering')),
-                    DropdownMenuItem(value: 'waiting for food', child: Text('Waiting for Food')),
-                    DropdownMenuItem(value: 'awaiting payment', child: Text('Awaiting Payment')),
-                    DropdownMenuItem(value: 'done', child: Text('Done')),
+                    DropdownMenuItem(value: 'Prepare', child: Text('Prepare')),
+                    DropdownMenuItem(value: 'Cook', child: Text('Cook')),
+                    DropdownMenuItem(value: 'Service', child: Text('Service')),
+                    DropdownMenuItem(value: 'Payment', child: Text('Payment')),
+                    DropdownMenuItem(value: 'Finish', child: Text('Finish')),
+                    DropdownMenuItem(
+                        value: 'Canceled', child: Text('Canceled')),
                   ],
                   onChanged: (value) {
                     // Handle filtering logic here
@@ -62,34 +75,49 @@ class _OrderPageState extends State<OrderPage> {
 
             // Orders list
             Expanded(
-              child: ListView.separated(
-                itemCount: orders.length,
-                separatorBuilder: (context, index) => Divider(),
-                itemBuilder: (context, index) {
-                  final order = orders[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Navigate to OrderTableDetail on tap
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OrderTableDetail(
-                            tableId: order.tableId,
+              child: FutureBuilder<List<OrderItem>>(
+                future: orders,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No orders found'));
+                  }
+
+                  final orderList = snapshot.data!;
+                  return ListView.separated(
+                    itemCount: orderList.length,
+                    separatorBuilder: (context, index) => Divider(),
+                    itemBuilder: (context, index) {
+                      final order = orderList[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OrderDetailPage(
+                                id: order.id,
+                                tableNumber: order.tableNumber,
+                                orderStatus: order.orderStatus,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: getStatusColor(order.orderStatus),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Table no: ${order.tableNumber} \n  - Status: ${order.orderStatus}',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       );
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: getStatusColor(order.status),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Table: ${order.tableId} - Status: ${order.status}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
                   );
                 },
               ),
@@ -99,12 +127,4 @@ class _OrderPageState extends State<OrderPage> {
       ),
     );
   }
-}
-
-// OrderItem model to represent orders
-class OrderItem {
-  final String tableId;
-  final String status;
-
-  OrderItem({required this.tableId, required this.status});
 }
