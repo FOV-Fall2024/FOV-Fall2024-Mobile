@@ -1,17 +1,37 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
 
 class PaycheckPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPaycheckSection(context),
-          ],
-        ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(getBackgroundImage()),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPaycheckSection(context),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -56,7 +76,7 @@ class PaycheckPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '1 Oct, 24 - 31 Oct, 24', // Paycheck period, need api
+                '1 Oct, 24 - 31 Oct, 24', // Paycheck period, need API
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black54,

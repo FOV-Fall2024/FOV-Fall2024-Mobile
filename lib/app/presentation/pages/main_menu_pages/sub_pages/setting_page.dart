@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 
 class SettingPage extends StatefulWidget {
@@ -27,8 +28,14 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Settings")),
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(getBackgroundImage()),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/test_pages/location_page.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/setting_page.dart';
@@ -49,124 +51,142 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(getBackgroundImage()),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: _onContainerTapped,
-                    child: Container(
-                      padding: EdgeInsets.all(6.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage:
-                                AssetImage('lib/assets/icons/avatar.png'),
-                          ),
-                          SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _fullName ?? 'Loading...',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Waiter',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _onContainerTapped,
+                        child: Container(
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),
-                          SizedBox(width: 5),
-                        ],
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage:
+                                    AssetImage('lib/assets/icons/avatar.png'),
+                              ),
+                              SizedBox(width: 8),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _fullName ?? 'Loading...',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Waiter',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 5),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    IconButton(
+                      icon: Icon(Icons.notifications),
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.notification);
+                      },
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.notifications),
-                  onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.notification);
-                  },
+                SizedBox(height: 80),
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 150,
+                        alignment: Alignment.center,
+                        child: AnalogClock(
+                          dateTime: DateTime.now(),
+                          isKeepTime: true,
+                          hourHandColor: Colors.black,
+                          minuteHandColor: Colors.black,
+                          secondHandColor: Colors.red,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      Text(
+                        'Attendance Status: ${_isChecked ? "Checked" : "Not Yet"}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: _isChecked ? Colors.green : Colors.red,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: _isChecked
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isChecked = true;
+                                });
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LocationPage()));
+                              },
+                        child: Text(
+                          'Take Attendance',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.all(30),
+                          backgroundColor:
+                              _isChecked ? Colors.grey : Colors.lightBlue,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 80),
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    height: 150,
-                    alignment: Alignment.center,
-                    child: AnalogClock(
-                      dateTime: DateTime.now(),
-                      isKeepTime: true,
-                      hourHandColor: Colors.black,
-                      minuteHandColor: Colors.black,
-                      secondHandColor: Colors.red,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  Text(
-                    'Attendance Status: ${_isChecked ? "Checked" : "Not Yet"}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: _isChecked ? Colors.green : Colors.red,
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _isChecked
-                        ? null
-                        : () {
-                            setState(() {
-                              _isChecked = true;
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LocationPage()));
-                          },
-                    child: Text(
-                      'Take Attendance',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(30),
-                      backgroundColor:
-                          _isChecked ? Colors.grey : Colors.lightBlue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
