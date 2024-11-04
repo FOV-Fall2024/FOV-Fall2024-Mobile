@@ -6,6 +6,8 @@ class AuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final StorageService _storageService = StorageService();
   final String _tokenKey = 'auth_token';
+  //Save personal info
+  final String _fullName = '';
 
   ///API related section
   // Login
@@ -20,9 +22,7 @@ class AuthRepository {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['reasonStatusCode'] == 'Success') {
-          print(responseData['metadata']['accessToken']);
-          await _storageService.write(
-              _tokenKey, responseData['metadata']['accessToken']);
+          await storeUserInfo(responseData['metadata']);
           return {'success': true, 'data': responseData};
         }
         return {'success': false, 'error': 'Invalid token received'};
@@ -120,9 +120,19 @@ class AuthRepository {
   }
 
   /// Flutter secure storage relate section
-  // Get token
+  // Store user info
+  Future<void> storeUserInfo(Map<String, dynamic> metadata) async {
+    await _storageService.write(_tokenKey, metadata['accessToken']);
+    await _storageService.write(_fullName, metadata['fullName']);
+  }
+
+  // Getter for storage
   Future<String?> getToken() async {
     return await _storageService.read(_tokenKey);
+  }
+
+  Future<String?> getFullname() async {
+    return await _storageService.read(_fullName);
   }
 
   // Delete token

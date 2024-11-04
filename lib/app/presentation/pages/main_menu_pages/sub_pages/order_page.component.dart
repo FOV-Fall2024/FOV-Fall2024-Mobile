@@ -15,12 +15,21 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  DateFormat('dd/MM/yyyy HH:mm').format(orderTime),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ],
+            ),
+            Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -50,26 +59,7 @@ class ItemCard extends StatelessWidget {
                 ),
               ],
             ),
-            Divider(),
-            // Second row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Order placement time',
-                        style: TextStyle(fontSize: 14)),
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm').format(orderTime),
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Third row
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -91,9 +81,9 @@ Color getStatusColor(String status) {
     case 'Cook':
       return Colors.amber;
     case 'Service':
-      return Colors.blue;
-    case 'Payment':
       return Colors.redAccent;
+    case 'Payment':
+      return Colors.blue;
     case 'Finish':
       return Colors.green;
     case 'Canceled':

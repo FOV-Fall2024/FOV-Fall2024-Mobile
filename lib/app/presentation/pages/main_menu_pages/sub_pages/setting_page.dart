@@ -1,57 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 
-void showLeaveRequestModal(BuildContext context) {
-  TextEditingController reasonController = TextEditingController();
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Request to Leave Early"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: reasonController,
-              decoration: InputDecoration(
-                labelText: "Reason",
-                hintText: "Enter the reason for leaving early",
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              String reason = reasonController.text;
-              if (reason.isNotEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Leave request submitted')),
-                );
-                Navigator.of(context).pop();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please enter a reason')),
-                );
-              }
-            },
-            child: Text("Confirm"),
-          ),
-        ],
-      );
-    },
-  );
+class SettingPage extends StatefulWidget {
+  @override
+  _SettingPageState createState() => _SettingPageState();
 }
 
-class SettingPage extends StatelessWidget {
+class _SettingPageState extends State<SettingPage> {
+  final AuthRepository authRepository = AuthRepository();
+  String? _fullName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  void _loadUserName() async {
+    final fullName = await authRepository.getFullname();
+    setState(() {
+      _fullName = fullName ?? 'Unknown User';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,7 +41,7 @@ class SettingPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'John Doe',
+              _fullName ?? 'Loading...',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -84,14 +55,6 @@ class SettingPage extends StatelessWidget {
                     leading: Icon(Icons.edit),
                     title: Text('Edit Profile'),
                     onTap: () {},
-                  ),
-                  Divider(),
-                  ListTile(
-                    leading: Icon(Icons.schedule),
-                    title: Text('Request to leave early'),
-                    onTap: () {
-                      showLeaveRequestModal(context);
-                    },
                   ),
                   Divider(),
                   ListTile(

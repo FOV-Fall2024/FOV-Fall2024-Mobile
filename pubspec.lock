@@ -158,6 +158,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_analog_clock:
+    dependency: "direct main"
+    description:
+      name: flutter_analog_clock
+      sha256: "5bf40195f93ff366c73c628e83fc5b380b9639121db77d30a68a12b442e89487"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -400,6 +408,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.16+1"
+  material:
+    dependency: "direct main"
+    description:
+      name: material
+      sha256: "7f3a2edadf60e3a8771b843baff931d4b2e7205d015059c3abe315344f23dfa4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0+2"
   material_color_utilities:
     dependency: transitive
     description:

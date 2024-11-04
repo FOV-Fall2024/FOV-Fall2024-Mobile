@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/test_pages/location_page.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/setting_page.dart';
-import 'package:intl/intl.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
+import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 import 'dart:async';
 
 class HomePage extends StatefulWidget {
@@ -11,22 +12,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  AuthRepository authRepository = AuthRepository();
   bool _isChecked = false;
-  String _currentTime = '';
   Timer? _timer;
+  String? _fullName;
 
   @override
   void initState() {
     super.initState();
-    _updateTime();
+    _loadUserInfo();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _updateTime();
+      setState(() {});
     });
   }
 
-  void _updateTime() {
+  void _loadUserInfo() async {
+    final fullName = await authRepository.getFullname();
     setState(() {
-      _currentTime = DateFormat('hh:mm a').format(DateTime.now());
+      _fullName = fullName ?? 'Unknown User';
     });
   }
 
@@ -75,14 +78,15 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           CircleAvatar(
                             radius: 30,
-                            backgroundImage: AssetImage('avatar.png'),
+                            backgroundImage:
+                                AssetImage('lib/assets/icons/avatar.png'),
                           ),
                           SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'John Doe',
+                                _fullName ?? 'Loading...',
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -97,13 +101,12 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ],
                           ),
+                          SizedBox(width: 5),
                         ],
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 100),
-                // Bell Icon
                 IconButton(
                   icon: Icon(Icons.notifications),
                   onPressed: () {
@@ -116,11 +119,15 @@ class _HomePageState extends State<HomePage> {
             Center(
               child: Column(
                 children: [
-                  Text(
-                    'Current Time: $_currentTime',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    height: 150,
+                    alignment: Alignment.center,
+                    child: AnalogClock(
+                      dateTime: DateTime.now(),
+                      isKeepTime: true,
+                      hourHandColor: Colors.black,
+                      minuteHandColor: Colors.black,
+                      secondHandColor: Colors.red,
                     ),
                   ),
                   SizedBox(height: 30),
@@ -150,8 +157,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(80),
+                      padding: EdgeInsets.all(30),
                       backgroundColor:
                           _isChecked ? Colors.grey : Colors.lightBlue,
                     ),

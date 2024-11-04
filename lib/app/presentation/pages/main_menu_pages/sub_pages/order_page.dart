@@ -12,14 +12,29 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   final OrderRepository orderRepository = OrderRepository();
   late Future<List<OrderItem>> orders;
+  String? selectedStatus = 'all';
 
+  @override
   void initState() {
     super.initState();
-    orders = orderRepository.getOrders();
+    orders = fetchFilteredOrders();
   }
 
-  void getOrder() async {
-    orders = orderRepository.getOrders();
+  Future<List<OrderItem>> fetchFilteredOrders() async {
+    final allOrders = await orderRepository.getOrders();
+    if (selectedStatus == 'all') {
+      return allOrders;
+    }
+    return allOrders
+        .where((order) => order.orderStatus == selectedStatus)
+        .toList();
+  }
+
+  void _onStatusChanged(String? status) {
+    setState(() {
+      selectedStatus = status;
+      orders = fetchFilteredOrders();
+    });
   }
 
   @override
@@ -30,12 +45,12 @@ class _OrderPageState extends State<OrderPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Filter section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Filter', style: TextStyle(fontSize: 20)),
                 DropdownButton<String>(
+                  value: selectedStatus,
                   items: [
                     DropdownMenuItem(value: 'all', child: Text('All')),
                     DropdownMenuItem(value: 'Prepare', child: Text('Prepare')),
@@ -46,9 +61,7 @@ class _OrderPageState extends State<OrderPage> {
                     DropdownMenuItem(
                         value: 'Canceled', child: Text('Canceled')),
                   ],
-                  onChanged: (value) {
-                    // Handle filtering logic here
-                  },
+                  onChanged: _onStatusChanged,
                   hint: Text('Select Status'),
                 ),
               ],
