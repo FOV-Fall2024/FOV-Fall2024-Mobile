@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/orderItem.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/order_page.component.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_detail_page.dart'; // Import the detail page
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_detail_page.dart';
 
 class OrderPage extends StatefulWidget {
   @override
@@ -19,25 +20,6 @@ class _OrderPageState extends State<OrderPage> {
 
   void getOrder() async {
     orders = orderRepository.getOrders();
-  }
-
-  Color getStatusColor(String status) {
-    switch (status) {
-      case 'Prepare':
-        return Colors.black;
-      case 'Cook':
-        return Colors.black;
-      case 'Service':
-        return Colors.black;
-      case 'Payment':
-        return Colors.black;
-      case 'Finish':
-        return Colors.black;
-      case 'Canceled':
-        return Colors.black;
-      default:
-        return Colors.black;
-    }
   }
 
   @override
@@ -105,16 +87,10 @@ class _OrderPageState extends State<OrderPage> {
                             ),
                           );
                         },
-                        child: Container(
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: getStatusColor(order.orderStatus),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'Table no: ${order.tableNumber} \n  - Status: ${order.orderStatus}',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        child: ItemCard(
+                          orderStatus: order.orderStatus,
+                          orderTime: DateTime.parse(order.orderTime),
+                          tableNo: order.tableNumber,
                         ),
                       );
                     },

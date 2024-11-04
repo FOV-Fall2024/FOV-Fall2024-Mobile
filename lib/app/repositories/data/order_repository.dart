@@ -21,7 +21,25 @@ class OrderRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((item) => OrderItem.fromJson(item)).toList();
+        List<OrderItem> orders =
+            data.map((item) => OrderItem.fromJson(item)).toList();
+
+        const List<String> statusOrder = [
+          'Prepare',
+          'Payment',
+          'Cook',
+          'Service',
+          'Finish',
+          'Canceled'
+        ];
+
+        orders.sort((a, b) {
+          int aIndex = statusOrder.indexOf(a.orderStatus);
+          int bIndex = statusOrder.indexOf(b.orderStatus);
+          return aIndex.compareTo(bIndex);
+        });
+
+        return orders;
       } else {
         throw Exception('Failed to fetch orders: ${response.statusCode}');
       }

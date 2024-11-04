@@ -84,9 +84,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                // Conditional rendering of the Confirm Order button
-                if (widget.orderStatus ==
-                    "Prepare") // Only show button if status is "Prepare"
+                if (widget.orderStatus == "Prepare")
                   Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: SizedBox(
