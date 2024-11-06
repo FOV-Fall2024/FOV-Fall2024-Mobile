@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.white.withOpacity(0.0),
             ),
           ),
           Padding(
@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
-                          color: _isChecked ? Colors.green : Colors.red,
+                          color: _isChecked ? Colors.green : Colors.amber,
                         ),
                       ),
                       SizedBox(height: 30),
@@ -174,10 +174,19 @@ class _HomePageState extends State<HomePage> {
                           'Take Attendance',
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.all(30),
-                          backgroundColor:
-                              _isChecked ? Colors.grey : Colors.lightBlue,
+                        style: ButtonStyle(
+                          padding: WidgetStateProperty.all<EdgeInsets>(
+                            EdgeInsets.all(15),
+                          ),
+                          backgroundColor: WidgetStatePropertyAll<Color>(
+                            _isChecked ? Colors.grey : Colors.lightBlue,
+                          ),
+                          shape:
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
                       ),
                     ],

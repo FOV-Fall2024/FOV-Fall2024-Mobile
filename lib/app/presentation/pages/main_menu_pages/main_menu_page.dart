@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import './sub_pages/home_page.dart';
-import './sub_pages/shift_page.dart';
 import './sub_pages/order_page.dart';
-import './sub_pages/paycheck_page.dart';
-import './sub_pages/clockout_page.dart';
+import './sub_pages/schedule_page.dart';
 
 class MainMenuPage extends StatefulWidget {
   @override
@@ -17,10 +15,8 @@ class _MainMenuPageState extends State<MainMenuPage> {
 
   static List<Widget> _pages = <Widget>[
     SafeArea(child: HomePage()),
-    SafeArea(child: ShiftPage()),
     SafeArea(child: OrderPage()),
-    SafeArea(child: PaycheckPage()),
-    SafeArea(child: ClockoutPage()),
+    SafeArea(child: SchedulePage()),
   ];
 
   void _onItemTapped(int index) {
@@ -56,10 +52,8 @@ class _MainMenuPageState extends State<MainMenuPage> {
       bottomNavigationBar: ConvexAppBar(
         items: [
           TabItem(icon: Icons.home, title: 'Home'),
-          TabItem(icon: Icons.work, title: 'Shift'),
           TabItem(icon: Icons.restaurant_menu, title: 'Order'),
-          TabItem(icon: Icons.request_quote, title: 'Paycheck'),
-          TabItem(icon: Icons.do_not_disturb_on, title: 'Clockout'),
+          TabItem(icon: Icons.date_range, title: 'Schedule'),
         ],
         initialActiveIndex: _selectedIndex,
         onTap: _onItemTapped,

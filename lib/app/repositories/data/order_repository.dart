@@ -91,4 +91,26 @@ class OrderRepository {
       throw Exception('An error occurred: $e');
     }
   }
+
+  //Confirm order and transfer to headchef
+  Future<String> confirmPayment(String id) async {
+    final url = Uri.parse('$_baseUrl/$id/cook');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}'
+    };
+
+    try {
+      final response = await http.patch(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        // throw Exception('Failed to confirm order: ${response.statusCode}');
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      throw Exception('An error occurred: $e');
+    }
+  }
 }

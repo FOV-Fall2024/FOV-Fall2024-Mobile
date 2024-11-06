@@ -41,10 +41,8 @@ class _SettingPageState extends State<SettingPage> {
           children: [
             SizedBox(height: 40),
             CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(
-                'https://via.placeholder.com/150',
-              ),
+              radius: 30,
+              backgroundImage: AssetImage('lib/assets/icons/avatar.png'),
             ),
             SizedBox(height: 16),
             Text(
@@ -66,7 +64,9 @@ class _SettingPageState extends State<SettingPage> {
                   Divider(),
                   ListTile(
                     leading: Icon(Icons.logout, color: Colors.red),
-                    title: Text('Logout'),
+                    title: Text(
+                      'Logout',
+                    ),
                     onTap: () {
                       Navigator.pushReplacementNamed(context, '/login');
                     },

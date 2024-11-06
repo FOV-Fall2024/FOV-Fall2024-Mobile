@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final StorageService _storageService = StorageService();
+  final signalRService = SignalRService();
   final String _tokenKey = 'auth_token';
   //Save personal info
   final String _fullName = '';
@@ -23,6 +25,8 @@ class AuthRepository {
         final responseData = jsonDecode(response.body);
         if (responseData['reasonStatusCode'] == 'Success') {
           await storeUserInfo(responseData['metadata']);
+          await signalRService.connect(
+              responseData['metadata']['id'], responseData['metadata']['role']);
           return {'success': true, 'data': responseData};
         }
         return {'success': false, 'error': 'Invalid token received'};
