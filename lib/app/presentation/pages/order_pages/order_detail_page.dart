@@ -1,6 +1,8 @@
+// lib/app/pages/order_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
+import './order_detal_page.component.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String id;
@@ -45,81 +47,45 @@ class _OrderDetailState extends State<OrderDetailPage> {
             return Center(child: Text('No order details found.'));
           } else {
             final orderDetail = snapshot.data!;
+            final additionalItems = getAdditionalItems(orderDetail);
+
             return Column(
               children: [
                 Expanded(
-                  child: ListView.separated(
+                  child: ListView(
                     padding: const EdgeInsets.all(16.0),
-                    itemCount: orderDetail.orderDetails.length,
-                    separatorBuilder: (context, index) => Divider(),
-                    itemBuilder: (context, index) {
-                      final item = orderDetail.orderDetails[index];
-                      return ListTile(
-                        leading: Image.network(
-                          item.comboId != null
-                              ? item.thumbnail.toString()
-                              : item.image.toString(),
-                          width: 50,
-                          height: 50,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.error);
-                          },
+                    children: [
+                      ...orderDetail.orderDetails
+                          .map((item) => OrderItemTile(item: item)),
+                      if (additionalItems.isNotEmpty)
+                        ExpansionTile(
+                          title: Text(
+                            'Additional Items',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          children: additionalItems
+                              .map((item) => OrderItemTile(item: item))
+                              .toList(),
                         ),
-                        title: Text(
-                          item.comboId != null
-                              ? item.comboName.toString()
-                              : item.productName.toString(),
-                        ),
-                        trailing: Text(
-                          '${(item.price * item.quantity).toStringAsFixed(2)} VND',
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Total Price: ${orderDetail.totalPrice} VND',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                if (widget.orderStatus == "Prepare")
-                  Padding(
-                    padding: const EdgeInsets.all(50.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final response = await orderRepository
-                              .confirmOrder(orderDetail.orderId);
-                          if (response != '500') {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Order confirmed!')),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Cannot confirm order!')),
-                            );
-                          }
-                        },
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'Confirm Order',
+                          'Total Price: ${formatCurrency(orderDetail.totalPrice)} VND',
                           style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
-                    ),
+                    ],
                   ),
+                ),
+                OrderActions(
+                  orderDetail: orderDetail,
+                  orderRepository: orderRepository,
+                  orderStatus: widget.orderStatus,
+                ),
+                SizedBox(
+                  height: 80,
+                )
               ],
             );
           }

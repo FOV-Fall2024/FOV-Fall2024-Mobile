@@ -21,19 +21,18 @@ A new Flutter project.
 └── main.dart
 ```
 ## Task checklist (Mobile Application for Waiter of branch):
- - [ ]	Login/Logout; (partially done, need api)
- - [ ]	Confirm customer orders;
- - [ ]	Order status management;
+ - [X]	Login/Logout;
+ - [X]	Confirm customer orders;
+ - [X]	Order status management;
  - [ ]	Checkout customer orders;
  - [ ]	Scan QR + get location to check attendance;
 
 ## Sub-task
- - [X]	Main screen with bottom navigation bar
- - [ ]	Main screen 1: Waiter basic info (name, role; attendance status and check attendance)
- - [ ]	Main screen 2: Load current orders from tables
- - [ ]	Main screen 3: Settings
+ - [X]	Cancel order
+ - []	Cancel add more order
+ - [ ]	Pay by cash
 
 ## Misc. task:
- - [ ]	Get location of user via GPS or network
+ - [X]	Get location of user via GPS or network
  - [X]	Receive notification using Firebase Cloud Message (current nitpick bug: notification while app is running in background or terminated not pop down from status bar)
  - [ ]	Access camera for scanning QR

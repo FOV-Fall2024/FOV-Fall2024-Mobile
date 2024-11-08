@@ -108,8 +108,8 @@ class _OrderPageState extends State<OrderPage> {
                     itemBuilder: (context, index) {
                       final order = orderList[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => OrderDetailPage(
@@ -119,6 +119,15 @@ class _OrderPageState extends State<OrderPage> {
                               ),
                             ),
                           );
+
+                          // Reload orders if an action was successfully completed
+                          if (result == 1) {
+                            // Assuming '1' is returned on successful action
+                            setState(() {
+                              orders =
+                                  fetchFilteredOrders(); // Refresh the orders list
+                            });
+                          }
                         },
                         child: ItemCard(
                           orderStatus: order.orderStatus,

@@ -92,9 +92,9 @@ class OrderRepository {
     }
   }
 
-  //Confirm order and transfer to headchef
-  Future<String> confirmPayment(String id) async {
-    final url = Uri.parse('$_baseUrl/$id/cook');
+  //Cancel order
+  Future<String> cancelOrder(String id) async {
+    final url = Uri.parse('$_baseUrl/$id/cancel');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await authRepository.getToken()}'
@@ -106,7 +106,29 @@ class OrderRepository {
       if (response.statusCode == 200) {
         return response.body;
       } else {
-        // throw Exception('Failed to confirm order: ${response.statusCode}');
+        // throw Exception('Failed to cancel order: ${response.statusCode}');
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      throw Exception('An error occurred: $e');
+    }
+  }
+
+  //Cancel order
+  Future<String> cancelAddMore(String id) async {
+    final url = Uri.parse('$_baseUrl/$id/cancel-add-more');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}'
+    };
+
+    try {
+      final response = await http.patch(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        // throw Exception('Failed to cancel add more: ${response.statusCode}');
         return response.statusCode.toString();
       }
     } catch (e) {
