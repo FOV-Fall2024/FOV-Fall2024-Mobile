@@ -22,11 +22,8 @@ class _OrderPageState extends State<OrderPage> {
   void initState() {
     super.initState();
     orders = fetchFilteredOrders();
-
-    // Listen to the SignalR updates
     signalRService.notificationStream.listen((_) {
       if (mounted) {
-        // Check if the widget is still in the widget tree
         setState(() {
           orders = fetchFilteredOrders();
         });
@@ -119,13 +116,9 @@ class _OrderPageState extends State<OrderPage> {
                               ),
                             ),
                           );
-
-                          // Reload orders if an action was successfully completed
                           if (result == 1) {
-                            // Assuming '1' is returned on successful action
                             setState(() {
-                              orders =
-                                  fetchFilteredOrders(); // Refresh the orders list
+                              orders = fetchFilteredOrders();
                             });
                           }
                         },

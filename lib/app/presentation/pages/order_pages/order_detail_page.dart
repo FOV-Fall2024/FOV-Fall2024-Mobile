@@ -47,6 +47,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
             return Center(child: Text('No order details found.'));
           } else {
             final orderDetail = snapshot.data!;
+            final items = getItems(orderDetail);
             final additionalItems = getAdditionalItems(orderDetail);
 
             return Column(
@@ -55,8 +56,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16.0),
                     children: [
-                      ...orderDetail.orderDetails
-                          .map((item) => OrderItemTile(item: item)),
+                      ...items.map((item) => OrderItemTile(item: item)),
                       if (additionalItems.isNotEmpty)
                         ExpansionTile(
                           title: Text(

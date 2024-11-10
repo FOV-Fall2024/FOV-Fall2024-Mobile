@@ -15,8 +15,7 @@ class _MainMenuPageState extends State<MainMenuPage> {
 
   static List<Widget> _pages = <Widget>[
     SafeArea(child: HomePage()),
-    SafeArea(
-        child: OrderPage()), // This is the OrderPage that will be refreshed
+    SafeArea(child: OrderPage()),
     SafeArea(child: SchedulePage()),
   ];
 

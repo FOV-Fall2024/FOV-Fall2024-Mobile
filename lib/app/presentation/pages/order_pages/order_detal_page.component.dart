@@ -63,13 +63,18 @@ class OrderActions extends StatelessWidget {
       successMessage = 'Order cancelled!';
       failureMessage = 'Cannot cancel order!';
       Navigator.pop(context, 1);
+    } else if (action == 'cancelAddMore') {
+      response = await orderRepository.cancelAddMore(orderDetail.orderId);
+      successMessage = 'Order cancelled!';
+      failureMessage = 'Cannot cancel order!';
+      Navigator.pop(context, 1);
     } else if (action == 'confirmPayment') {
       response = await paymentRepository.confirmPayByCash(orderDetail.orderId);
       successMessage = 'Payment confirmed!';
       failureMessage = 'Cannot confirm payment!';
       Navigator.pop(context, 1);
     } else {
-      return; // No valid action provided
+      return;
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -83,12 +88,20 @@ class OrderActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (orderStatus == "Prepare")
+        if (orderStatus == "Prepare" && getAdditionalItems(orderDetail).isEmpty)
           _buildActionButton(
             context,
             'Cancel Order',
             Colors.red,
             () => _handleOrderAction(context, 'cancel'),
+          ),
+        if (orderStatus == "Prepare" &&
+            getAdditionalItems(orderDetail).isNotEmpty)
+          _buildActionButton(
+            context,
+            'Cancel Additional Items',
+            Colors.red,
+            () => _handleOrderAction(context, 'cancelAddMore'),
           ),
         if (orderStatus == "Prepare")
           _buildActionButton(
@@ -131,6 +144,12 @@ class OrderActions extends StatelessWidget {
 String formatCurrency(int value) {
   var formatter = NumberFormat.decimalPattern('vi_VN');
   return formatter.format(value);
+}
+
+List<OrderDetailItem> getItems(OrderDetail orderDetail) {
+  return orderDetail.orderDetails
+      .where((item) => item.isAddMore == false)
+      .toList();
 }
 
 List<OrderDetailItem> getAdditionalItems(OrderDetail orderDetail) {
