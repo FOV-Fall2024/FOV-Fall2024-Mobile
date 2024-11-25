@@ -1,15 +1,18 @@
 import 'dart:convert';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:http/http.dart' as http;
 
-class AuthRepository {
+class AuthRepository implements IAuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final StorageService _storageService = StorageService();
   final signalRService = SignalRService();
   final String _tokenKey = 'auth_token';
   //Save personal info
-  final String _fullName = '';
+  final String _fullName = '_fullName';
+  final String _employeeId = '_employeeId';
+  final String _restaurantId = '_restaurantId';
 
   ///API related section
   // Login
@@ -128,6 +131,7 @@ class AuthRepository {
   Future<void> storeUserInfo(Map<String, dynamic> metadata) async {
     await _storageService.write(_tokenKey, metadata['accessToken']);
     await _storageService.write(_fullName, metadata['fullName']);
+    await _storageService.write(_employeeId, metadata['id']);
   }
 
   // Getter for storage
@@ -137,6 +141,14 @@ class AuthRepository {
 
   Future<String?> getFullname() async {
     return await _storageService.read(_fullName);
+  }
+
+  Future<String?> getUserId() async {
+    return await _storageService.read(_employeeId);
+  }
+
+  Future<String?> getRestaurantId() async {
+    return await _storageService.read(_restaurantId);
   }
 
   // Delete token

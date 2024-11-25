@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_order_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_payment_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/paymentItem.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/payment_repository.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 class OrderItemTile extends StatelessWidget {
@@ -52,35 +56,67 @@ class OrderActions extends StatelessWidget {
     String response;
     String successMessage;
     String failureMessage;
-
+    //Confirm order to send to headchef
     if (action == 'confirm') {
       response = await orderRepository.confirmOrder(orderDetail.orderId);
       successMessage = 'Order confirmed!';
       failureMessage = 'Cannot confirm order!';
       Navigator.pop(context, 1);
-    } else if (action == 'cancel') {
+    }
+    //Cancel order for customer to re-ordering
+    else if (action == 'cancel') {
       response = await orderRepository.cancelOrder(orderDetail.orderId);
       successMessage = 'Order cancelled!';
       failureMessage = 'Cannot cancel order!';
       Navigator.pop(context, 1);
-    } else if (action == 'cancelAddMore') {
+    }
+    //Cancel add more order
+    else if (action == 'cancelAddMore') {
       response = await orderRepository.cancelAddMore(orderDetail.orderId);
       successMessage = 'Order cancelled!';
       failureMessage = 'Cannot cancel order!';
       Navigator.pop(context, 1);
-    } else if (action == 'confirmPayment') {
+    }
+    //Confirm payment by cash
+    else if (action == 'confirmPayment') {
       response = await paymentRepository.confirmPayByCash(orderDetail.orderId);
       successMessage = 'Payment confirmed!';
       failureMessage = 'Cannot confirm payment!';
       Navigator.pop(context, 1);
+    }
+    //Return refundable items
+    else if (action == "refund") {
+      _showRefundDialog(context);
     } else {
       return;
     }
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //       content: Text(response != '500' ? successMessage : failureMessage)),
+    // );
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(response != '500' ? successMessage : failureMessage)),
-    );
+  void _showRefundDialog(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Refund Items"),
+            content: _RefundItemsList(orderDetail: orderDetail),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("Cancel"),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   @override
@@ -110,13 +146,28 @@ class OrderActions extends StatelessWidget {
             Colors.green,
             () => _handleOrderAction(context, 'confirm'),
           ),
-        if (orderStatus == "payment")
+        if (orderStatus == "Service")
           _buildActionButton(
             context,
-            'Confirm receive money from customer',
-            Colors.blue,
-            () => _handleOrderAction(context, 'confirmPayment'),
+            'Return item',
+            Colors.green,
+            () => _handleOrderAction(context, 'refund'),
           ),
+        if (orderStatus == "Payment")
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _BuildPaymentWidget(orderId: orderDetail.orderId),
+              _buildActionButton(
+                context,
+                'Confirm receive money from customer',
+                Colors.blue,
+                () => _handleOrderAction(context, 'confirmPayment'),
+              )
+            ],
+          ),
+        if (orderStatus == "Finish")
+          _BuildPaymentWidget(orderId: orderDetail.orderId),
       ],
     );
   }
@@ -141,6 +192,57 @@ class OrderActions extends StatelessWidget {
   }
 }
 
+class _BuildPaymentWidget extends StatelessWidget {
+  final String orderId;
+  final paymentRepository = GetIt.I<IPaymentRepository>();
+
+  _BuildPaymentWidget({
+    Key? key,
+    required this.orderId,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<PaymentItem>>(
+      future: paymentRepository.getPayment(orderId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          final payments = snapshot.data!;
+          if (payments.isEmpty) {
+            return const Text('No payments found');
+          }
+          final payment = payments[0];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Discount Member Point: ${payment.reduceAmount}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w300,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Final Price: ${formatCurrency(payment.finalAmount)} VND',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
 String formatCurrency(int value) {
   var formatter = NumberFormat.decimalPattern('vi_VN');
   return formatter.format(value);
@@ -156,4 +258,135 @@ List<OrderDetailItem> getAdditionalItems(OrderDetail orderDetail) {
   return orderDetail.orderDetails
       .where((item) => item.isAddMore == true)
       .toList();
+}
+
+class _RefundItemsList extends StatefulWidget {
+  final OrderDetail orderDetail;
+
+  const _RefundItemsList({Key? key, required this.orderDetail})
+      : super(key: key);
+
+  @override
+  _RefundItemsListState createState() => _RefundItemsListState();
+}
+
+class _RefundItemsListState extends State<_RefundItemsList> {
+  List<OrderDetailItem> refundableItems = [];
+  Map<String, int> adjustedRefundQuantities = {};
+  final orderRepository = GetIt.I<IOrderRepository>();
+
+  @override
+  void initState() {
+    super.initState();
+    refundableItems = widget.orderDetail.orderDetails.where((item) {
+      return item.isRefund == true && 0 <= item.quantity;
+    }).toList();
+    refundableItems.forEach((item) {
+      adjustedRefundQuantities[item.id] = item.refundQuantity;
+    });
+  }
+
+  void _updateRefundQuantity(String itemId, int newQuantity) {
+    setState(() {
+      if (newQuantity >= 0 &&
+          newQuantity <=
+              refundableItems
+                  .firstWhere((item) => item.id == itemId)
+                  .quantity) {
+        adjustedRefundQuantities[itemId] = newQuantity;
+      }
+    });
+  }
+
+  void _confirmRefund() async {
+    List<OrderDetailItem> itemsToRefund = refundableItems.where((item) {
+      int adjustedQuantity = adjustedRefundQuantities[item.id] ?? 0;
+      return adjustedQuantity > 0;
+    }).toList();
+
+    if (itemsToRefund.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Processing refunds...")),
+      );
+      for (var item in itemsToRefund) {
+        final int refundQuantity = adjustedRefundQuantities[item.id] ?? 0;
+
+        try {
+          final response = await orderRepository.refundOrder(
+            orderId: widget.orderDetail.orderId,
+            orderDetailId: item.id,
+            refundQuantity: refundQuantity,
+          );
+          if (response == '200') {
+            print("Successfully refunded item: ${item.productName}");
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //       content:
+            //           Text("Successfully refunded item: ${item.productName}")),
+            // );
+            Navigator.pop(context, 1);
+          } else {
+            print(
+                "Failed to refund item: ${item.productName}, Response: $response");
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //       content: Text("Failed to refund item: ${item.productName}")),
+            // );
+          }
+        } catch (e) {
+          print(
+              "An error occurred while refunding item: ${item.productName}, Error: $e");
+        }
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Refund process completed.")),
+      );
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No items selected for refund")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...refundableItems.map((item) {
+          int adjustedQuantity =
+              adjustedRefundQuantities[item.id] ?? item.refundQuantity;
+
+          return ListTile(
+            title: Text(item.productName ?? 'Unknown Product'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: adjustedQuantity > 0
+                      ? () =>
+                          _updateRefundQuantity(item.id, adjustedQuantity - 1)
+                      : null,
+                ),
+                Text(adjustedQuantity.toString()),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: adjustedQuantity < item.quantity
+                      ? () =>
+                          _updateRefundQuantity(item.id, adjustedQuantity + 1)
+                      : null,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        ElevatedButton(
+          onPressed: _confirmRefund,
+          child: Text('Confirm Refund'),
+        ),
+      ],
+    );
+  }
 }

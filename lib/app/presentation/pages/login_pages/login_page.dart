@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
+import 'package:get_it/get_it.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/commands/login_command.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,29 +12,25 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController securityCodeController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
-  final AuthRepository authRepository = AuthRepository();
+  final IAuthRepository authRepository = GetIt.I<IAuthRepository>();
   bool _isLoading = false;
   bool _rememberMe = false;
 
   void _login() async {
-    String securityCode = securityCodeController.text;
-    String password = passwordController.text;
-    Map<String, dynamic>? userData =
-        await authRepository.login(securityCode, password);
-    if (userData['success'] == true) {
-      Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login successfully.'),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to sign in. Please try again.'),
-        ),
-      );
-    }
+    setState(() {
+      _isLoading = true;
+    });
+
+    await loginCommand(
+      context: context,
+      securityCode: securityCodeController.text,
+      password: passwordController.text,
+      authRepository: authRepository,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override

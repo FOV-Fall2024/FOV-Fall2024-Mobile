@@ -7,16 +7,23 @@ A new Flutter project.
 📁 lib
 ├─ 📁 assets
 ├─ 📁 app
-│  ├─ 📁 contracts (interfaces)
-│  ├─ 📁 domain
-│  │  └─ 📄 some_domain.dart
+│  ├─ 📁 commands
+│  │  └─ 📄 some_command.dart
+│  ├─ 📁 contracts
+│  │  └─ 📄 i_repo_interface.dart
 │  ├─ 📁 entities
 │  │  └─ 📄 freezed_entity.dart
+│  ├─ 📁 enviroments
+│  │  └─ 📄 base_enviroment.dart
+│  ├─ 📁 permissions
+│  │  └─ 📄 permission.dart
 │  ├─ 📁 presentation
 │  │  ├─ 📁 pages
 │  │  │  └─ 📄 home_page_widget.dart
 │  │  └─ 📄 your_app.dart
 │  ├─ 📁 repositories
+│  │  ├─ 📁 data
+│  ├─ 📁 services
 │  │  ├─ 📁 data
 └── main.dart
 ```
@@ -24,15 +31,15 @@ A new Flutter project.
  - [X]	Login/Logout;
  - [X]	Confirm customer orders;
  - [X]	Order status management;
- - [ ]	Checkout customer orders;
+ - [X]	Checkout customer orders;
  - [ ]	Scan QR + get location to check attendance;
 
 ## Sub-task
  - [X]	Cancel order
- - []	Cancel add more order
- - [ ]	Pay by cash
+ - [X]	Cancel add more order
+ - [X]	Pay by cash (not tested)
 
 ## Misc. task:
  - [X]	Get location of user via GPS or network
  - [X]	Receive notification using Firebase Cloud Message (current nitpick bug: notification while app is running in background or terminated not pop down from status bar)
- - [ ]	Access camera for scanning QR
+ - [X]	Access camera for scanning QR

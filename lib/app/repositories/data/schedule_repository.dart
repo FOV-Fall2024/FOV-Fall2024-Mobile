@@ -1,16 +1,18 @@
 import 'dart:convert';
-import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_shift_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_schedule_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 import 'package:http/http.dart' as http;
 
-class ShiftRepository implements IShiftRepository {
-  final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Shift';
+class ScheduleRepository implements IScheduleRepository {
+  final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Schedule';
 
-  Future<Map<String, dynamic>> getShifts() async {
-    final url = Uri.parse(_baseUrl);
+  Future<Map<String, dynamic>> getScheduleOfCurrentWeek() async {
+    final employeeId = await AuthRepository().getUserId();
+    final token = await AuthRepository().getToken();
+    final url = Uri.parse('$_baseUrl/employee?EmployeeId=$employeeId');
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await AuthRepository().getToken()}'
+      'Authorization': 'Bearer $token'
     };
 
     try {
@@ -20,7 +22,7 @@ class ShiftRepository implements IShiftRepository {
         return {'data': jsonDecode(response.body)};
       } else {
         return {
-          'error': 'Failed to fetch shifts',
+          'error': 'Failed to fetch schedules',
           'statusCode': response.statusCode
         };
       }

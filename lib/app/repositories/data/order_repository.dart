@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/orderItem.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 import 'package:http/http.dart' as http;
 
-class OrderRepository {
+class OrderRepository implements IOrderRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/Order';
   final AuthRepository authRepository = AuthRepository();
 
@@ -129,6 +130,36 @@ class OrderRepository {
         return response.body;
       } else {
         // throw Exception('Failed to cancel add more: ${response.statusCode}');
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      throw Exception('An error occurred: $e');
+    }
+  }
+
+  //Refund item in order
+  Future<String> refundOrder({
+    required String orderId,
+    required String orderDetailId,
+    required int refundQuantity,
+  }) async {
+    final url = Uri.parse('$_baseUrl/$orderId/refund');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}',
+    };
+    final body = jsonEncode({
+      'orderDetailId': orderDetailId,
+      'refundQuantity': refundQuantity,
+    });
+
+    try {
+      final response = await http.patch(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        // throw Exception('Failed to refund order: ${response.statusCode}');
         return response.statusCode.toString();
       }
     } catch (e) {

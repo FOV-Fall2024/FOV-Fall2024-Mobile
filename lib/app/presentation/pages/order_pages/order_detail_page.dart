@@ -67,14 +67,16 @@ class _OrderDetailState extends State<OrderDetailPage> {
                               .map((item) => OrderItemTile(item: item))
                               .toList(),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          'Total Price: ${formatCurrency(orderDetail.totalPrice)} VND',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'Total Price: ${formatCurrency(orderDetail.totalPrice)} VND',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),
