@@ -14,16 +14,21 @@ class OrderRepository implements IOrderRepository {
     final url = Uri.parse(_baseUrl);
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await authRepository.getToken()}'
+      'Authorization': 'Bearer ${await authRepository.getToken()}',
     };
 
     try {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        // Extract the 'results' list
+        final List<dynamic> results = data['results'];
+
+        // Map the results to a list of OrderItem objects
         List<OrderItem> orders =
-            data.map((item) => OrderItem.fromJson(item)).toList();
+            results.map((item) => OrderItem.fromJson(item)).toList();
 
         const List<String> statusOrder = [
           'Prepare',
@@ -34,6 +39,7 @@ class OrderRepository implements IOrderRepository {
           'Canceled'
         ];
 
+        // Sort orders based on the predefined status order
         orders.sort((a, b) {
           int aIndex = statusOrder.indexOf(a.orderStatus);
           int bIndex = statusOrder.indexOf(b.orderStatus);
@@ -143,18 +149,15 @@ class OrderRepository implements IOrderRepository {
     required String orderDetailId,
     required int refundQuantity,
   }) async {
-    final url = Uri.parse('$_baseUrl/$orderId/refund');
+    final url = Uri.parse(
+        '$_baseUrl/$orderId/refund?orderDetailId=$orderDetailId&refundQuantity=$refundQuantity');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await authRepository.getToken()}',
     };
-    final body = jsonEncode({
-      'orderDetailId': orderDetailId,
-      'refundQuantity': refundQuantity,
-    });
 
     try {
-      final response = await http.patch(url, headers: headers, body: body);
+      final response = await http.patch(url, headers: headers);
 
       if (response.statusCode == 200) {
         return response.body;

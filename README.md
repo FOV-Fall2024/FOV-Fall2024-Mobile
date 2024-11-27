@@ -43,3 +43,14 @@ A new Flutter project.
  - [X]	Get location of user via GPS or network
  - [X]	Receive notification using Firebase Cloud Message (current nitpick bug: notification while app is running in background or terminated not pop down from status bar)
  - [X]	Access camera for scanning QR
+
+## DI implementation status:
+ - [X]	Login page
+ - [ ]	Main menu page
+ - [ ]	Order page
+ - [ ]	Schedule page
+ - [ ]	Setting page
+ - [ ]	Take attendance page
+ - [ ]	Notification page
+ - [ ]	Order detail page
+ - [ ]	

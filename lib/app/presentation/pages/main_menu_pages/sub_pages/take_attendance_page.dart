@@ -45,6 +45,7 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
       });
       await _fetchLocation();
       await _fetchUserId();
+
       try {
         if (_latitude != null &&
             _longitude != null &&
@@ -58,20 +59,22 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
             _longitude!,
           );
 
-          if (response['success']) {
+          if (response['success'] == true) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Check-in successful!')),
+              SnackBar(
+                  content: Text(response['message'] ?? 'Check-in successful!')),
             );
             setState(() {
-              rs = RespondStatus(status: true, message: response['success']);
+              rs = RespondStatus.success(
+                  response['message'] ?? 'Check-in successful!');
             });
           } else {
             String errorMessage = response['error'] ?? 'Check-in failed.';
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Check-in failed')),
+              SnackBar(content: Text(errorMessage)),
             );
             setState(() {
-              rs = RespondStatus(status: false, message: errorMessage);
+              rs = RespondStatus.error(errorMessage);
             });
           }
         } else {

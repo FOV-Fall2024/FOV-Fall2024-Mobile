@@ -22,9 +22,15 @@ class AttendanceRepository implements IAttendanceRepository {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+
+        // Infer success based on the response structure
+        bool isSuccess = responseData['statusCode'] == 200 &&
+            responseData['reasonStatusCode'] == "Success";
+
         return {
-          'success': true,
+          'success': isSuccess,
           'data': responseData,
+          'message': responseData['message'] ?? '',
           'statusCode': response.statusCode
         };
       } else {

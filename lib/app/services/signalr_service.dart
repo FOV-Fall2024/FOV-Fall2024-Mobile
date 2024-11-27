@@ -11,7 +11,8 @@ class SignalRService {
   SignalRService._internal() {
     _hubConnection = HubConnectionBuilder()
         .withUrl("http://vktrng.ddns.net:8080/notification-hub")
-        .build();
+        .withAutomaticReconnect(
+            retryDelays: [2000, 5000, 10000, 20000]).build();
     _hubConnection.on("ReceiveNotificationToWaiter", _handleNotification);
   }
 

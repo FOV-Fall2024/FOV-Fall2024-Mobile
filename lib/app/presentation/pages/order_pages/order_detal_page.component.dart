@@ -33,7 +33,7 @@ class OrderItemTile extends StatelessWidget {
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text('Status: ${item.status}'),
-      trailing: Text('${formatCurrency(item.price * item.quantity)} VND'),
+      trailing: Text('${formatCurrency(item.price)} VND'),
     );
   }
 }
@@ -41,7 +41,9 @@ class OrderItemTile extends StatelessWidget {
 class OrderActions extends StatelessWidget {
   final OrderDetail orderDetail;
   final OrderRepository orderRepository;
+  final PaymentRepository paymentRepository = PaymentRepository();
   final String orderStatus;
+  bool isButtonPressed = false;
 
   OrderActions({
     Key? key,
@@ -49,8 +51,6 @@ class OrderActions extends StatelessWidget {
     required this.orderRepository,
     required this.orderStatus,
   }) : super(key: key);
-
-  final PaymentRepository paymentRepository = PaymentRepository();
 
   Future<void> _handleOrderAction(BuildContext context, String action) async {
     String response;
@@ -62,6 +62,7 @@ class OrderActions extends StatelessWidget {
       successMessage = 'Order confirmed!';
       failureMessage = 'Cannot confirm order!';
       Navigator.pop(context, 1);
+      isButtonPressed = true;
     }
     //Cancel order for customer to re-ordering
     else if (action == 'cancel') {
@@ -69,6 +70,7 @@ class OrderActions extends StatelessWidget {
       successMessage = 'Order cancelled!';
       failureMessage = 'Cannot cancel order!';
       Navigator.pop(context, 1);
+      isButtonPressed = true;
     }
     //Cancel add more order
     else if (action == 'cancelAddMore') {
@@ -76,6 +78,7 @@ class OrderActions extends StatelessWidget {
       successMessage = 'Order cancelled!';
       failureMessage = 'Cannot cancel order!';
       Navigator.pop(context, 1);
+      isButtonPressed = true;
     }
     //Confirm payment by cash
     else if (action == 'confirmPayment') {
@@ -83,6 +86,7 @@ class OrderActions extends StatelessWidget {
       successMessage = 'Payment confirmed!';
       failureMessage = 'Cannot confirm payment!';
       Navigator.pop(context, 1);
+      isButtonPressed = true;
     }
     //Return refundable items
     else if (action == "refund") {
@@ -128,7 +132,8 @@ class OrderActions extends StatelessWidget {
           _buildActionButton(
             context,
             'Cancel Order',
-            Colors.red,
+            isButtonPressed ? Colors.grey : Colors.red,
+            isButtonPressed,
             () => _handleOrderAction(context, 'cancel'),
           ),
         if (orderStatus == "Prepare" &&
@@ -136,49 +141,58 @@ class OrderActions extends StatelessWidget {
           _buildActionButton(
             context,
             'Cancel Additional Items',
-            Colors.red,
+            isButtonPressed ? Colors.grey : Colors.red,
+            isButtonPressed,
             () => _handleOrderAction(context, 'cancelAddMore'),
           ),
         if (orderStatus == "Prepare")
           _buildActionButton(
             context,
             'Confirm Order',
-            Colors.green,
+            isButtonPressed ? Colors.grey : Colors.green,
+            isButtonPressed,
             () => _handleOrderAction(context, 'confirm'),
           ),
         if (orderStatus == "Service")
           _buildActionButton(
             context,
             'Return item',
-            Colors.green,
+            isButtonPressed ? Colors.grey : Colors.green,
+            isButtonPressed,
             () => _handleOrderAction(context, 'refund'),
           ),
         if (orderStatus == "Payment")
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _BuildPaymentWidget(orderId: orderDetail.orderId),
               _buildActionButton(
                 context,
                 'Confirm receive money from customer',
-                Colors.blue,
+                isButtonPressed ? Colors.grey : Colors.blue,
+                isButtonPressed,
                 () => _handleOrderAction(context, 'confirmPayment'),
               )
             ],
           ),
         if (orderStatus == "Finish")
-          _BuildPaymentWidget(orderId: orderDetail.orderId),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _BuildPaymentWidget(orderId: orderDetail.orderId),
+            ],
+          ),
       ],
     );
   }
 
-  Widget _buildActionButton(
-      BuildContext context, String text, Color color, VoidCallback onPressed) {
+  Widget _buildActionButton(BuildContext context, String text, Color color,
+      bool isButtonPressed, VoidCallback onPressed) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isButtonPressed ? null : onPressed,
         child: Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
@@ -282,7 +296,7 @@ class _RefundItemsListState extends State<_RefundItemsList> {
       return item.isRefund == true && 0 <= item.quantity;
     }).toList();
     refundableItems.forEach((item) {
-      adjustedRefundQuantities[item.id] = item.refundQuantity;
+      adjustedRefundQuantities[item.id] = (item.quantity - item.refundQuantity);
     });
   }
 
@@ -355,8 +369,8 @@ class _RefundItemsListState extends State<_RefundItemsList> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ...refundableItems.map((item) {
-          int adjustedQuantity =
-              adjustedRefundQuantities[item.id] ?? item.refundQuantity;
+          int adjustedQuantity = adjustedRefundQuantities[item.id] ??
+              (item.quantity - item.refundQuantity);
 
           return ListTile(
             title: Text(item.productName ?? 'Unknown Product'),
@@ -373,7 +387,8 @@ class _RefundItemsListState extends State<_RefundItemsList> {
                 Text(adjustedQuantity.toString()),
                 IconButton(
                   icon: Icon(Icons.add),
-                  onPressed: adjustedQuantity < item.quantity
+                  onPressed: adjustedQuantity <
+                          (item.quantity - item.refundQuantity)
                       ? () =>
                           _updateRefundQuantity(item.id, adjustedQuantity + 1)
                       : null,
