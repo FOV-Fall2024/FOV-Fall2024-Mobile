@@ -1,15 +1,18 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/main.dart';
+import 'package:get_it/get_it.dart';
 
 class PushNotificationService {
   static final _firebaseMessaging = FirebaseMessaging.instance;
-  static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final authRepository = GetIt.I<IAuthRepository>();
 
-  Future<String?> generateDeviceRecogitionToken() async {
+  Future<void> generateDeviceRecogitionToken() async {
     String? deviceRecogitionToken = await _firebaseMessaging.getToken();
-    RedisService().storeDRMtoRedis(deviceRecogitionToken, "SHOULD-BE-GUID-HERE");
     print(deviceRecogitionToken);
     // firebaseMessaging.subscribeToTopic("waiter");
   }
@@ -25,25 +28,26 @@ class PushNotificationService {
       sound: true,
     );
   }
+
   static Future localNotiInit() async {
     // initialise the plugin
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings(
+        AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
     final DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
+        DarwinInitializationSettings(
       onDidReceiveLocalNotification: (id, title, body, payload) => null,
     );
     final InitializationSettings initializationSettings =
-    InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsDarwin);
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsDarwin);
 
     // request notification permissions for android 13 or above
     _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()!
+            AndroidFlutterLocalNotificationsPlugin>()!
         .requestNotificationsPermission();
 
     _flutterLocalNotificationsPlugin.initialize(initializationSettings,
@@ -65,13 +69,13 @@ class PushNotificationService {
   }) async {
     //yet to come up for a name
     const AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails('your channel id', 'your channel name',
-        channelDescription: 'your channel description',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
+        AndroidNotificationDetails('your channel id', 'your channel name',
+            channelDescription: 'your channel description',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker');
     const NotificationDetails notificationDetails =
-    NotificationDetails(android: androidNotificationDetails);
+        NotificationDetails(android: androidNotificationDetails);
     await _flutterLocalNotificationsPlugin
         .show(0, title, body, notificationDetails, payload: payload);
   }

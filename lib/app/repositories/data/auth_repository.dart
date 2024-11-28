@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +10,7 @@ class AuthRepository implements IAuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final StorageService _storageService = StorageService();
   final signalRService = SignalRService();
+  static final _firebaseMessaging = FirebaseMessaging.instance;
   final String _tokenKey = 'auth_token';
   //Save personal info
   final String _fullName = '_fullName';
@@ -28,6 +31,8 @@ class AuthRepository implements IAuthRepository {
         final responseData = jsonDecode(response.body);
         if (responseData['reasonStatusCode'] == 'Success') {
           await storeUserInfo(responseData['metadata']);
+          RedisService().storeDRMtoRedis(await _firebaseMessaging.getToken(),
+              responseData['metadata']['id']);
           await signalRService.connect(
               responseData['metadata']['id'], responseData['metadata']['role']);
           return {'success': true, 'data': responseData};

@@ -1,22 +1,21 @@
 {
   "project_info": {
-    "project_number": "213725885966",
-    "firebase_url": "https://fov-fall2024-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "fov-fall2024",
-    "storage_bucket": "fov-fall2024.appspot.com"
+    "project_number": "376507364132",
+    "project_id": "final-capstone-da026",
+    "storage_bucket": "final-capstone-da026.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:213725885966:android:06b58aa612511e0e6e2e5f",
+        "mobilesdk_app_id": "1:376507364132:android:d233bdca648c6abb0df9b1",
         "android_client_info": {
-          "package_name": "com.company.fov"
+          "package_name": "com.fov.waiter_mobile_app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDbRVBgSmhhyX0fEcOTrz112irFeJ8mLvw"
+          "current_key": "AIzaSyDNcgzjWZV964M33IUUCv5e2O-uO4EqHFc"
         }
       ],
       "services": {
@@ -27,15 +26,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:213725885966:android:0aed7b9e2ce6e64b6e2e5f",
+        "mobilesdk_app_id": "1:376507364132:android:25d03a8e267bf4f70df9b1",
         "android_client_info": {
-          "package_name": "com.fov.waiter_mobile_app"
+          "package_name": "com.fpt.vrom"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDbRVBgSmhhyX0fEcOTrz112irFeJ8mLvw"
+          "current_key": "AIzaSyDNcgzjWZV964M33IUUCv5e2O-uO4EqHFc"
         }
       ],
       "services": {
