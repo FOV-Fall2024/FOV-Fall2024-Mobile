@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/commands/home_page_command.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/take_attendance_page.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
@@ -63,9 +64,11 @@ class _LoginPageState extends State<LoginPage> {
       if (response['success'] == true) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Login successful')));
-        // Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => TakeAttendancePage()));
+        if (await AttendanceShiftService().isCurrentShiftMatched())
+          Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+        else
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => TakeAttendancePage()));
       } else {
         String errorMessage = response['error'] ?? 'Login failed';
         ScaffoldMessenger.of(context)
