@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart';
+import 'package:get_it/get_it.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -9,6 +12,8 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
   final AuthRepository authRepository = AuthRepository();
+  final storageService = GetIt.I<IStorageService>();
+  final signalRService = SignalRService();
   String? _fullName;
 
   @override
@@ -68,6 +73,8 @@ class _SettingPageState extends State<SettingPage> {
                       'Logout',
                     ),
                     onTap: () {
+                      storageService.deleteAll();
+                      signalRService.disconnect();
                       Navigator.pushReplacementNamed(context, '/login');
                     },
                   ),

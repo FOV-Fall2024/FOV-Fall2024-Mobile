@@ -1,10 +1,22 @@
 import 'dart:convert';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 import 'package:http/http.dart' as http;
 
 class AttendanceRepository implements IAttendanceRepository {
   final authRepository = AuthRepository();
+  final String baseUrl = "http://vktrng.ddns.net:8080/api/Attendance";
+
+  Future<AttendanceResponse> fetchAttendance() async {
+    final response = await http.get(Uri.parse('$baseUrl/daily'));
+
+    if (response.statusCode == 200) {
+      return AttendanceResponse.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load attendance');
+    }
+  }
 
   Future<Map<String, dynamic>> checkIn(String qrCodeData, String userId,
       double latitude, double longitude) async {

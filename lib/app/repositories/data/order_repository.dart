@@ -169,4 +169,57 @@ class OrderRepository implements IOrderRepository {
       throw Exception('An error occurred: $e');
     }
   }
+
+  //Serve refundable dish
+  Future<String> serveRefundableDish(
+      {required String orderId, required String orderDetailsId}) async {
+    final url =
+        '$_baseUrl/$orderId/refundable-dish?orderDetailsId=$orderDetailsId';
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}',
+    };
+
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      throw Exception('An error occurred: $e');
+    }
+  }
+
+  //Serve cooked food tranfer from headchef
+  Future<String> serveCookedDish(
+      {required String orderId, required String orderDetailsId}) async {
+    final url = '$_baseUrl/$orderId/serve?orderDetailsId=$orderDetailsId';
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}',
+    };
+
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        return response.statusCode.toString();
+      }
+    } catch (e) {
+      throw Exception('An error occurred: $e');
+    }
+  }
 }

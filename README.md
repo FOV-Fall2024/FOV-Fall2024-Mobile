@@ -54,3 +54,9 @@ A new Flutter project.
  - [ ]	Notification page
  - [ ]	Order detail page
  - [ ]	
+
+## Todos
+ - [ ]	Login flow: Login page - check attendance status, if status == false -> attendance page (scan qr + location)
+ - [ ]	Order flow: if item.isAddMore == true -> show button for waiter to services (partially done, need testing)
+ - [ ]	Order flow: if item.status == cooked -> show button for waiter to services (partially done, need testing)
+ - [X]  Order item: display note from customer (done, rebuilding whole item card)

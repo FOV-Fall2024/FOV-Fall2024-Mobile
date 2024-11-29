@@ -1,9 +1,9 @@
 class OrderItem {
   final String id;
   final String orderStatus;
-  final int totalPrice;
-  final int reduceAmount;
-  final int finalAmount;
+  final dynamic totalPrice;
+  final dynamic reduceAmount;
+  final dynamic finalAmount;
   final String orderTime;
   final String tableId;
   final int tableNumber;

@@ -1,3 +1,5 @@
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:get_it/get_it.dart';
 //Interfaces
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
@@ -18,6 +20,7 @@ final getIt = GetIt.instance;
 
 //Setup
 void setupDependencyInjection() {
+  //Repositories
   getIt.registerLazySingleton<IAttendanceRepository>(
       () => AttendanceRepository());
   getIt.registerLazySingleton<IAuthRepository>(() => AuthRepository());
@@ -25,4 +28,6 @@ void setupDependencyInjection() {
   getIt.registerLazySingleton<IPaymentRepository>(() => PaymentRepository());
   getIt.registerLazySingleton<IScheduleRepository>(() => ScheduleRepository());
   getIt.registerLazySingleton<IShiftRepository>(() => ShiftRepository());
+  //Services
+  getIt.registerLazySingleton<IStorageService>(() => StorageService());
 }

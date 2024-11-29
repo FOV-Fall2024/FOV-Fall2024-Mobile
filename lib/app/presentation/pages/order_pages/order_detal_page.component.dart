@@ -9,31 +9,152 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 class OrderItemTile extends StatelessWidget {
+  final String orderId;
+  final String orderStatus;
   final OrderDetailItem item;
+  final orderRepository = GetIt.I<IOrderRepository>();
 
-  const OrderItemTile({Key? key, required this.item}) : super(key: key);
+  OrderItemTile(
+      {Key? key,
+      required this.orderId,
+      required this.orderStatus,
+      required this.item})
+      : super(key: key);
+
+  Future<void> _serveRefundableDishToCustomer(OrderDetailItem item) async {
+    try {
+      String response;
+      response = await orderRepository.serveRefundableDish(
+          orderId: orderId, orderDetailsId: item.id);
+      print('Refundable dish served: $response');
+    } catch (e) {
+      print('An error occurred while serving the dish: $e');
+    }
+  }
+
+  Future<void> _serveCookedDishToCustomer(OrderDetailItem item) async {
+    try {
+      String response;
+      response = await orderRepository.serveCookedDish(
+          orderId: orderId, orderDetailsId: item.id);
+      print('Cooked dish served: $response');
+    } catch (e) {
+      print('An error occurred while serving the dish: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Image.network(
-        item.comboId != null
-            ? item.thumbnail.toString()
-            : item.image.toString(),
-        width: 50,
-        height: 50,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(Icons.error);
-        },
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Text(
+                item.status,
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.network(
+                  item.comboId != null
+                      ? item.thumbnail.toString()
+                      : item.image.toString(),
+                  width: 50,
+                  height: 50,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.error, size: 50);
+                  },
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.comboId != null
+                            ? item.comboName.toString()
+                            : item.productName.toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Qty: ${item.quantity}',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (item.note != null && item.note.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Note: ${item.note}',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Divider(),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                '${formatCurrency(item.price)} VND',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (orderStatus == 'Cook' &&
+                item.status == 'Cooked' &&
+                item.isRefund == false)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    await _serveCookedDishToCustomer(item);
+                  },
+                  child: const Text('Serve cooked dish to Customer'),
+                ),
+              ),
+            if (orderStatus == 'Cook' &&
+                item.status == 'Cook' &&
+                item.isRefund == true)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    await _serveRefundableDishToCustomer(item);
+                  },
+                  child: const Text('Serve refundable to Customer'),
+                ),
+              ),
+          ],
+        ),
       ),
-      title: Text(
-        item.comboId != null
-            ? item.comboName.toString()
-            : item.productName.toString(),
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text('Status: ${item.status}'),
-      trailing: Text('${formatCurrency(item.price)} VND'),
     );
   }
 }

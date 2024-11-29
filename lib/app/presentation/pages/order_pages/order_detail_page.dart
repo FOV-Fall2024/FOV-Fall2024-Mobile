@@ -56,7 +56,10 @@ class _OrderDetailState extends State<OrderDetailPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16.0),
                     children: [
-                      ...items.map((item) => OrderItemTile(item: item)),
+                      ...items.map((item) => OrderItemTile(
+                          orderId: widget.id,
+                          orderStatus: widget.orderStatus,
+                          item: item)),
                       if (additionalItems.isNotEmpty)
                         ExpansionTile(
                           title: Text(
@@ -64,7 +67,10 @@ class _OrderDetailState extends State<OrderDetailPage> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           children: additionalItems
-                              .map((item) => OrderItemTile(item: item))
+                              .map((item) => OrderItemTile(
+                                  orderId: widget.id,
+                                  orderStatus: widget.orderStatus,
+                                  item: item))
                               .toList(),
                         ),
                       Center(

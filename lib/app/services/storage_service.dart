@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 
-class StorageService {
+class StorageService implements IStorageService {
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   /// New/update key
