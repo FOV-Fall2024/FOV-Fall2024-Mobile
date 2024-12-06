@@ -207,33 +207,15 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 40),
-                        if (rs.status)
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(
-                                  context, AppRoutes.mainMenu);
-                            },
-                            child: Text('Return to Home Screen'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                            ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pushReplacementNamed(
+                              context, AppRoutes.mainMenu),
+                          child: Text('Return to Home Screen'),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
                           ),
-                        if (!rs.status)
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TakeAttendancePage()));
-                            },
-                            child: Text('Take attendance again'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                            ),
-                          ),
+                        ),
                       ],
                     ),
                   ),
