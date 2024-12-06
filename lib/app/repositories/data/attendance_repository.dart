@@ -20,17 +20,14 @@ class AttendanceRepository implements IAttendanceRepository {
 
   Future<Map<String, dynamic>> checkIn(String qrCodeData, String userId,
       double latitude, double longitude) async {
-    Uri scannedUri = Uri.parse(qrCodeData);
-    Map<String, String> updateQueryParams = Map.from(scannedUri.queryParameters)
-      ..addAll({
-        'userId': userId,
-        'latitude': latitude.toString(),
-        'longitude': longitude.toString(),
-      });
-    Uri updatedUri = scannedUri.replace(queryParameters: updateQueryParams);
-
+    Uri url = Uri.parse(qrCodeData);
+    final body = jsonEncode({
+      'userId': userId,
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+    });
     try {
-      final response = await http.post(updatedUri);
+      final response = await http.post(url, body: body);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
