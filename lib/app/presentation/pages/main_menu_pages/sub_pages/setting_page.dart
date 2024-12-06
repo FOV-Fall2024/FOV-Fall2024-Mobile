@@ -49,7 +49,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Future<void> _handleCheckout() async {
-    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
+    DateFormat dateFormat = DateFormat("YYYY-MM-dd");
     setState(() {
       isLoading = true;
     });
@@ -65,7 +65,6 @@ class _SettingPageState extends State<SettingPage> {
     }
 
     try {
-      // const shiftId = "exampleShiftId";
       String? shiftId = await storageService.read("currentShift");
       final date = dateFormat.format(DateTime.now());
 

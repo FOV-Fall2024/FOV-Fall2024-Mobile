@@ -22,31 +22,32 @@ class OrderRepository implements IOrderRepository {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-
-        // Extract the 'results' list
-        final List<dynamic> results = data['results'];
+        final List<dynamic>? results = data['results'];
 
         // Map the results to a list of OrderItem objects
-        List<OrderItem> orders =
-            results.map((item) => OrderItem.fromJson(item)).toList();
+        if (results != null) {
+          List<OrderItem> orders =
+              results.map((item) => OrderItem.fromJson(item)).toList();
 
-        const List<String> statusOrder = [
-          'Prepare',
-          'Payment',
-          'Cook',
-          'Service',
-          'Finish',
-          'Canceled'
-        ];
+          const List<String> statusOrder = [
+            'Prepare',
+            'Payment',
+            'Cook',
+            'Service',
+            'Finish',
+            'Canceled'
+          ];
 
-        // Sort orders based on the predefined status order
-        orders.sort((a, b) {
-          int aIndex = statusOrder.indexOf(a.orderStatus);
-          int bIndex = statusOrder.indexOf(b.orderStatus);
-          return aIndex.compareTo(bIndex);
-        });
+          // Sort orders based on the predefined status order
+          orders.sort((a, b) {
+            int aIndex = statusOrder.indexOf(a.orderStatus);
+            int bIndex = statusOrder.indexOf(b.orderStatus);
+            return aIndex.compareTo(bIndex);
+          });
 
-        return orders;
+          return orders;
+        } else
+          return [];
       } else {
         throw Exception('Failed to fetch orders: ${response.statusCode}');
       }
