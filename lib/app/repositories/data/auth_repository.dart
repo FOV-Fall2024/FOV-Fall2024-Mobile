@@ -3,14 +3,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRepository implements IAuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final _storageService = GetIt.I<IStorageService>();
-  final signalRService = SignalRService();
   static final _firebaseMessaging = FirebaseMessaging.instance;
   final String _tokenKey = 'auth_token';
   //Save personal info
@@ -34,8 +32,6 @@ class AuthRepository implements IAuthRepository {
           await storeUserInfo(responseData['metadata']);
           RedisService().storeDRMtoRedis(await _firebaseMessaging.getToken(),
               responseData['metadata']['id']);
-          await signalRService.connect(
-              responseData['metadata']['id'], responseData['metadata']['role']);
           return {'success': true, 'data': responseData};
         }
         return {'success': false, 'error': 'Invalid token received'};

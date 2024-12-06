@@ -64,11 +64,11 @@ class _LoginPageState extends State<LoginPage> {
       if (response['success'] == true) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Login successful')));
-        if (await AttendanceShiftService().isCurrentShiftMatched())
-          Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-        else
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => TakeAttendancePage()));
+        Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+        // if (await AttendanceShiftService().isCurrentShiftMatched() == true)
+        // else
+        //   Navigator.pushReplacement(context,
+        //       MaterialPageRoute(builder: (context) => TakeAttendancePage()));
       } else {
         String errorMessage = response['error'] ?? 'Login failed';
         ScaffoldMessenger.of(context)

@@ -4,4 +4,6 @@ abstract class IAttendanceRepository {
   Future<AttendanceResponse> fetchAttendance();
   Future<Map<String, dynamic>> checkIn(
       String qrCodeData, String userId, double latitude, double longitude);
+  Future<Map<String, dynamic>> checkOut(
+      String shiftId, String date, double latitude, double longitude);
 }

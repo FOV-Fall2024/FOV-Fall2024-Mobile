@@ -1,9 +1,9 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/orderItem.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/order_page.component.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_detail_page.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/services/signalr_service.dart'; // Import the SignalR service
 
 class OrderPage extends StatefulWidget {
   @override
@@ -13,17 +13,15 @@ class OrderPage extends StatefulWidget {
 class _OrderPageState extends State<OrderPage> {
   final OrderRepository orderRepository = OrderRepository();
   late Future<List<OrderItem>> orders;
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
   String? selectedStatus = 'all';
-
-  // Subscribe to updates from SignalR
-  final SignalRService signalRService = SignalRService();
 
   @override
   void initState() {
     super.initState();
     orders = fetchFilteredOrders();
-    signalRService.notificationStream.listen((_) {
-      if (mounted) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
         setState(() {
           orders = fetchFilteredOrders();
         });
@@ -34,7 +32,6 @@ class _OrderPageState extends State<OrderPage> {
   @override
   void dispose() {
     super.dispose();
-    signalRService.notificationStream.drain();
   }
 
   Future<List<OrderItem>> fetchFilteredOrders() async {

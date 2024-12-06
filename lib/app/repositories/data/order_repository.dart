@@ -171,6 +171,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Serve refundable dish
+  //Deprecated
   Future<String> serveRefundableDish(
       {required String orderId, required String orderDetailsId}) async {
     final url =
@@ -198,6 +199,8 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Serve cooked food tranfer from headchef
+  //Also used to serve refundable dish to customer
+  //NEED REFACTOR
   Future<String> serveCookedDish(
       {required String orderId, required String orderDetailsId}) async {
     final url = '$_baseUrl/$orderId/serve?orderDetailsId=$orderDetailsId';

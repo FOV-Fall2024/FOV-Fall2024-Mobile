@@ -24,7 +24,7 @@ class OrderItemTile extends StatelessWidget {
   Future<void> _serveRefundableDishToCustomer(OrderDetailItem item) async {
     try {
       String response;
-      response = await orderRepository.serveRefundableDish(
+      response = await orderRepository.serveCookedDish(
           orderId: orderId, orderDetailsId: item.id);
       print('Refundable dish served: $response');
     } catch (e) {
@@ -120,7 +120,7 @@ class OrderItemTile extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                '${formatCurrency(item.price)} VND',
+                '${formatCurrency(item.price * (item.quantity - item.refundQuantity))} VND',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -141,7 +141,7 @@ class OrderItemTile extends StatelessWidget {
                 ),
               ),
             if (orderStatus == 'Cook' &&
-                item.status == 'Cook' &&
+                item.status == 'Prepare' &&
                 item.isRefund == true)
               Align(
                 alignment: Alignment.bottomRight,
@@ -249,12 +249,22 @@ class OrderActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (orderStatus == "Prepare")
+          _buildActionButton(
+            context,
+            'Confirm Order',
+            isButtonPressed ? Colors.grey : Colors.green,
+            isButtonPressed,
+            false,
+            () => _handleOrderAction(context, 'confirm'),
+          ),
         if (orderStatus == "Prepare" && getAdditionalItems(orderDetail).isEmpty)
           _buildActionButton(
             context,
             'Cancel Order',
             isButtonPressed ? Colors.grey : Colors.red,
             isButtonPressed,
+            true,
             () => _handleOrderAction(context, 'cancel'),
           ),
         if (orderStatus == "Prepare" &&
@@ -264,15 +274,8 @@ class OrderActions extends StatelessWidget {
             'Cancel Additional Items',
             isButtonPressed ? Colors.grey : Colors.red,
             isButtonPressed,
+            true,
             () => _handleOrderAction(context, 'cancelAddMore'),
-          ),
-        if (orderStatus == "Prepare")
-          _buildActionButton(
-            context,
-            'Confirm Order',
-            isButtonPressed ? Colors.grey : Colors.green,
-            isButtonPressed,
-            () => _handleOrderAction(context, 'confirm'),
           ),
         if (orderStatus == "Service")
           _buildActionButton(
@@ -280,6 +283,7 @@ class OrderActions extends StatelessWidget {
             'Return item',
             isButtonPressed ? Colors.grey : Colors.green,
             isButtonPressed,
+            false,
             () => _handleOrderAction(context, 'refund'),
           ),
         if (orderStatus == "Payment")
@@ -292,6 +296,7 @@ class OrderActions extends StatelessWidget {
                 'Confirm receive money from customer',
                 isButtonPressed ? Colors.grey : Colors.blue,
                 isButtonPressed,
+                false,
                 () => _handleOrderAction(context, 'confirmPayment'),
               )
             ],
@@ -308,22 +313,41 @@ class OrderActions extends StatelessWidget {
   }
 
   Widget _buildActionButton(BuildContext context, String text, Color color,
-      bool isButtonPressed, VoidCallback onPressed) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: isButtonPressed ? null : onPressed,
-        child: Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+      bool isButtonPressed, bool isButtonCancel, VoidCallback onPressed) {
+    if (isButtonCancel == false)
+      return Container(
+        padding: const EdgeInsets.all(16.0),
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isButtonPressed ? null : onPressed,
+          child:
+              Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 15),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 15),
         ),
-      ),
-    );
+      );
+    else
+      return Container(
+        padding: const EdgeInsets.all(16.0),
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isButtonPressed ? null : onPressed,
+          child:
+              Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 15),
+          ),
+        ),
+      );
   }
 }
 

@@ -8,7 +8,7 @@ class OrderItem {
   final String tableId;
   final int tableNumber;
   final String customerName;
-  final int? phoneNumber;
+  final String? phoneNumber;
   final String? feedback;
   final String createdDate;
 

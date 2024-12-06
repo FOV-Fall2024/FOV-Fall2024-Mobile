@@ -34,8 +34,6 @@ class AttendanceRepository implements IAttendanceRepository {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-
-        // Infer success based on the response structure
         bool isSuccess = responseData['statusCode'] == 200 &&
             responseData['reasonStatusCode'] == "Success";
 
@@ -46,7 +44,46 @@ class AttendanceRepository implements IAttendanceRepository {
           'statusCode': response.statusCode
         };
       } else {
-        // Parse the error message if available
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final responseData = jsonDecode(decodedBody);
+        String errorMessage =
+            responseData['message'] ?? 'Unknown error occurred';
+        return {
+          'success': false,
+          'error': errorMessage,
+          'statusCode': response.statusCode
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'An error occurred: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> checkOut(
+      String shiftId, String date, double latitude, double longitude) async {
+    try {
+      final url = Uri.parse('$baseUrl/checkout?shiftId=$shiftId&date=$date');
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${await authRepository.getToken()}'
+      };
+      final body = jsonEncode({'latitude': latitude, 'longitude': longitude});
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        bool isSuccess = responseData['statusCode'] == 200 &&
+            responseData['reasonStatusCode'] == "Success";
+
+        return {
+          'success': isSuccess,
+          'data': responseData,
+          'message': responseData['message'] ?? '',
+          'statusCode': response.statusCode
+        };
+      } else {
         final decodedBody = utf8.decode(response.bodyBytes);
         final responseData = jsonDecode(decodedBody);
         String errorMessage =
