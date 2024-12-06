@@ -28,8 +28,8 @@ class AttendanceResponse {
 
 class Attendance {
   String id;
-  String checkInTime;
-  String checkOutTime;
+  String? checkInTime;
+  String? checkOutTime;
   WaiterSchedule waiterSchedule;
   DateTime createdDate;
 

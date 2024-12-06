@@ -1,4 +1,3 @@
-// lib/app/pages/order_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';

@@ -16,12 +16,13 @@ class AttendanceShiftService {
           await attendanceRepository.fetchAttendance();
       DateTime now = DateTime.now();
       Shifts? currentShift = _findCurrentShift(shifts, now);
-
+      //if no shift match current shift
       if (currentShift == null) {
         return false;
       }
+      //search for current shift attendance status
       for (Attendance attendance in attendanceResponse.results) {
-        if (attendance.waiterSchedule.shift.shiftId == currentShift.id) {
+        if (attendance.checkInTime != null) {
           return true;
         }
       }

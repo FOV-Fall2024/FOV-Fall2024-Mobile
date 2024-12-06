@@ -1,10 +1,7 @@
-import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/commands/home_page_command.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
