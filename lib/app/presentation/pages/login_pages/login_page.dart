@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/commands/home_page_command.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/take_attendance_page.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,6 +163,7 @@ class _LoginPageState extends State<LoginPage> {
           .showSnackBar(SnackBar(content: Text('Login successful')));
       _saveCredentials();
       Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+    } else {
       String errorMessage = response['error'] ?? 'Login failed';
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorMessage)));

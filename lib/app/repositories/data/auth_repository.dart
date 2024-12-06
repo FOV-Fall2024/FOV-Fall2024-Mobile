@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_fcmToken_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/fcm_token_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +11,7 @@ import 'package:http/http.dart' as http;
 class AuthRepository implements IAuthRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Auth';
   final _storageService = GetIt.I<IStorageService>();
+  final fcmTokenRepository = GetIt.I<IFcmtokenRepository>();
   static final _firebaseMessaging = FirebaseMessaging.instance;
   final String _tokenKey = 'auth_token';
   //Save personal info
@@ -22,6 +25,7 @@ class AuthRepository implements IAuthRepository {
     final url = Uri.parse('$_baseUrl/login');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({'code': code, 'password': password});
+    final fcmToken = await _firebaseMessaging.getToken();
 
     try {
       final response = await http.post(url, headers: headers, body: body);
@@ -30,8 +34,10 @@ class AuthRepository implements IAuthRepository {
         final responseData = jsonDecode(response.body);
         if (responseData['reasonStatusCode'] == 'Success') {
           await storeUserInfo(responseData['metadata']);
-          RedisService().storeDRMtoRedis(await _firebaseMessaging.getToken(),
-              responseData['metadata']['id']);
+          RedisService()
+              .storeDRMtoRedis(fcmToken, responseData['metadata']['id']);
+          await fcmTokenRepository.sendFCMTokenWithUserId(
+              responseData['metadata']['id'], fcmToken.toString());
           return {'success': true, 'data': responseData};
         }
         return {'success': false, 'error': 'Invalid token received'};
