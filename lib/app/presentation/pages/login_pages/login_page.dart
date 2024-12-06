@@ -64,11 +64,11 @@ class _LoginPageState extends State<LoginPage> {
       if (response['success'] == true) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Login successful')));
-        Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
-        // if (await AttendanceShiftService().isCurrentShiftMatched() == true)
-        // else
-        //   Navigator.pushReplacement(context,
-        //       MaterialPageRoute(builder: (context) => TakeAttendancePage()));
+        if (await AttendanceShiftService().isCurrentShiftMatched() == true)
+          Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+        else
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => TakeAttendancePage()));
       } else {
         String errorMessage = response['error'] ?? 'Login failed';
         ScaffoldMessenger.of(context)
@@ -168,7 +168,11 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Login successful')));
       _saveCredentials();
-      Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+      // if (await AttendanceShiftService().isCurrentShiftMatched() == true)
+      //   Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+      // else
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => TakeAttendancePage()));
     } else {
       String errorMessage = response['error'] ?? 'Login failed';
       ScaffoldMessenger.of(context)
