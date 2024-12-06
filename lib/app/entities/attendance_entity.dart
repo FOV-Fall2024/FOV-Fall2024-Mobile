@@ -28,20 +28,23 @@ class AttendanceResponse {
 
 class Attendance {
   String id;
-  DateTime checkInTime;
+  String checkInTime;
+  String checkOutTime;
   WaiterSchedule waiterSchedule;
   DateTime createdDate;
 
   Attendance({
     required this.id,
     required this.checkInTime,
+    required this.checkOutTime,
     required this.waiterSchedule,
     required this.createdDate,
   });
 
   factory Attendance.fromJson(Map<String, dynamic> json) => Attendance(
         id: json["id"],
-        checkInTime: DateTime.parse(json["checkInTime"]),
+        checkInTime: json["checkInTime"],
+        checkOutTime: json["checkOutTime"],
         waiterSchedule: WaiterSchedule.fromJson(json["waiterSchedule"]),
         createdDate: DateTime.parse(json["createdDate"]),
       );

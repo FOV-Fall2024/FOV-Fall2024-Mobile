@@ -49,7 +49,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Future<void> _handleCheckout() async {
-    DateFormat dateFormat = DateFormat("dd/MM/YYYY");
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
     setState(() {
       isLoading = true;
     });

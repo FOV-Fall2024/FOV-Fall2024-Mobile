@@ -21,13 +21,15 @@ class AttendanceRepository implements IAttendanceRepository {
   Future<Map<String, dynamic>> checkIn(String qrCodeData, String userId,
       double latitude, double longitude) async {
     Uri url = Uri.parse(qrCodeData);
+    final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'userId': userId,
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
     });
+
     try {
-      final response = await http.post(url, body: body);
+      final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);

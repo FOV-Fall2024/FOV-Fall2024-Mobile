@@ -146,96 +146,101 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // QR Scanner View
-          if (!scanned)
-            MobileScanner(
-              controller: controller,
-            ),
-
-          // Close Button
-          Positioned(
-            top: 50,
-            left: 20,
-            child: IconButton(
-              icon: Icon(Icons.close, color: Colors.white, size: 30),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-
-          // Scanning View
-          if (!scanned)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 250,
-                      height: 250,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blue, width: 4),
-                      ),
+    return new WillPopScope(
+        onWillPop: () async => false,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              if (!scanned)
+                MobileScanner(
+                  controller: controller,
+                ),
+              if (!scanned)
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 250,
+                          height: 250,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blue, width: 4),
+                          ),
+                        ),
+                        SizedBox(height: 100),
+                        Card(
+                          margin: EdgeInsets.all(20),
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Text(
+                              'Scan QR code provided by your manager to take attendance',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 100),
-                    Card(
-                      margin: EdgeInsets.all(20),
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Text(
-                          'Scan QR code provided by your manager to take attendance',
+                  ),
+                ),
+
+              // Scanned Status and Return Button
+              if (scanned)
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          rs.status ? Icons.check_circle : Icons.cancel,
+                          color: rs.status ? Colors.green : Colors.red,
+                          size: 100,
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          rs.message,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
-                      ),
+                        SizedBox(height: 40),
+                        if (rs.status)
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                  context, AppRoutes.mainMenu);
+                            },
+                            child: Text('Return to Home Screen'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
+                            ),
+                          ),
+                        if (!rs.status)
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TakeAttendancePage()));
+                            },
+                            child: Text('Take attendance again'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
+                            ),
+                          ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-
-          // Scanned Status and Return Button
-          if (scanned)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      rs.status ? Icons.check_circle : Icons.cancel,
-                      color: rs.status ? Colors.green : Colors.red,
-                      size: 100,
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      rs.message,
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 40),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.mainMenu);
-                      },
-                      child: Text('Return to Home Screen'),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+            ],
+          ),
+        ));
   }
 
   @override

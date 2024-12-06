@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadUserInfo();
-    futureMatch = AttendanceShiftService().isCurrentShiftMatched();
+    futureMatch = AttendanceShiftService().isUserCheckIn();
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {});

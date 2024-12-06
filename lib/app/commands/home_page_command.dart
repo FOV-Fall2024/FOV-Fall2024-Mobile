@@ -9,7 +9,7 @@ class AttendanceShiftService {
   final shiftRepository = GetIt.I<IShiftRepository>();
   final attendanceRepository = GetIt.I<IAttendanceRepository>();
 
-  Future<bool> isCurrentShiftMatched() async {
+  Future<bool> isUserCheckIn() async {
     try {
       List<Shifts> shifts = await shiftRepository.getShifts();
       AttendanceResponse attendanceResponse =
@@ -25,7 +25,6 @@ class AttendanceShiftService {
           return true;
         }
       }
-
       return false;
     } catch (e) {
       print('Error: $e');
