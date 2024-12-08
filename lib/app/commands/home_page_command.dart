@@ -5,28 +5,56 @@ import 'package:fov_fall2024_waiter_mobile_app/app/entities/shift_entity.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
 import 'package:get_it/get_it.dart';
 
+enum AttendanceStatus {
+  noSchedule,
+  noShiftMatch,
+  userIsCheckIn,
+  userIsNotCheckIn
+}
+
 class AttendanceShiftService {
   final shiftRepository = GetIt.I<IShiftRepository>();
   final attendanceRepository = GetIt.I<IAttendanceRepository>();
 
-  Future<bool> isUserCheckIn() async {
+  Future<AttendanceStatus> isUserCheckIn() async {
     try {
       List<Shifts> shifts = await shiftRepository.getShifts();
       AttendanceResponse attendanceResponse =
-          await attendanceRepository.fetchAttendance();
+          await attendanceRepository.fetchDailyAttendance();
       DateTime now = DateTime.now();
       Shifts? currentShift = _findCurrentShift(shifts, now);
-      //if no shift match current shift
+
+      //if no shift matches the current time
       if (currentShift == null) {
-        return false;
+        return AttendanceStatus.noSchedule;
       }
-      //search for current shift attendance status
-      for (Attendance attendance in attendanceResponse.results) {
-        if (attendance.checkInTime != null) {
-          return true;
-        }
+      var attendance = attendanceResponse.results.firstWhere(
+        (a) => a.waiterSchedule.shift.shiftId == currentShift.id,
+        //create dummy for no match case
+        orElse: () => Attendance(
+            id: "",
+            checkInTime: null,
+            checkOutTime: null,
+            waiterSchedule: WaiterSchedule(
+                id: "",
+                employee: Employee(
+                    employeeId: "",
+                    employeeCode: "",
+                    employeeName: "",
+                    waiterScheduleId: ""),
+                shift: Shift(shiftId: "", shiftName: ""),
+                isCheckIn: false),
+            createdDate: DateTime.now()),
+      );
+      if (attendance.id.isEmpty) {
+        return AttendanceStatus.noSchedule;
+      } else if (attendance.waiterSchedule.isCheckIn == true) {
+        return AttendanceStatus.userIsCheckIn;
+      } else if (attendance.waiterSchedule.isCheckIn == false) {
+        return AttendanceStatus.userIsNotCheckIn;
+      } else {
+        return AttendanceStatus.noShiftMatch;
       }
-      return false;
     } catch (e) {
       print('Error: $e');
       throw Exception('Failed to process attendance and shift data.');
@@ -38,10 +66,10 @@ class AttendanceShiftService {
       DateTime startTime = _combineDateAndTime(now, shift.startTime);
       DateTime endTime = _combineDateAndTime(now, shift.endTime);
       if (endTime.isBefore(startTime)) {
-        endTime = endTime.add(const Duration(days: 1));
+        endTime = endTime.add(const Duration(days: 1)); // End time is next day
       }
       if (now.isAfter(startTime.subtract(const Duration(minutes: 30))) &&
-          now.isBefore(endTime.add(const Duration(minutes: 30)))) {
+          now.isBefore(endTime)) {
         return shift;
       }
     }

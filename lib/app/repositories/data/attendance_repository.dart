@@ -8,7 +8,7 @@ class AttendanceRepository implements IAttendanceRepository {
   final authRepository = AuthRepository();
   final String baseUrl = "http://vktrng.ddns.net:8080/api/Attendance";
 
-  Future<AttendanceResponse> fetchAttendance() async {
+  Future<AttendanceResponse> fetchDailyAttendance() async {
     final response = await http.get(Uri.parse('$baseUrl/daily'));
 
     if (response.statusCode == 200) {

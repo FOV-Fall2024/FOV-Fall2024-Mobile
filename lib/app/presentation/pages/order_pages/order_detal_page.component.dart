@@ -335,7 +335,7 @@ class OrderActions extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16.0),
         width: double.infinity,
-        child: ElevatedButton(
+        child: OutlinedButton(
           onPressed: isButtonPressed ? null : onPressed,
           child:
               Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),

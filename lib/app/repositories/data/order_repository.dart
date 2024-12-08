@@ -48,11 +48,13 @@ class OrderRepository implements IOrderRepository {
           return orders;
         } else
           return [];
+      } else if (response.statusCode == 401) {
+        throw 'You do not have access to this page';
       } else {
-        throw Exception('Failed to fetch orders: ${response.statusCode}');
+        throw 'Failed to fetch orders: ${response.statusCode}';
       }
     } catch (e) {
-      throw Exception('An error occurred: $e');
+      rethrow;
     }
   }
 

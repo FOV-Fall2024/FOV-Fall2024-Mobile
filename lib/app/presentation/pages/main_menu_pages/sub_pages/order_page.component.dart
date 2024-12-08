@@ -80,6 +80,8 @@ Color getStatusColor(String status) {
       return Colors.deepOrangeAccent;
     case 'Cook':
       return Colors.amber;
+    case 'Cooked':
+      return Colors.yellow;
     case 'Service':
       return Colors.redAccent;
     case 'Payment':

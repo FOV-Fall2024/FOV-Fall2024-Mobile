@@ -1,33 +1,30 @@
 import 'dart:convert';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_schedule_repository.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/schedule_entity.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:intl/intl.dart';
 
 class ScheduleRepository implements IScheduleRepository {
-  final String _baseUrl = 'http://vktrng.ddns.net:8080/api/v1/Schedule';
-
-  Future<Map<String, dynamic>> getScheduleOfCurrentWeek() async {
-    final employeeId = await AuthRepository().getUserId();
-    final token = await AuthRepository().getToken();
-    final url = Uri.parse('$_baseUrl/employee?EmployeeId=$employeeId');
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token'
-    };
-
+  final String baseUrl = 'http://vktrng.ddns.net:8080/api/Schedule';
+  Future<ScheduleResponse> getCurrentWeekSchedule() async {
     try {
+      final authRepository = GetIt.I<IAuthRepository>();
+      var today = DateFormat("yyyy-MM-dd").format(DateTime.now());
+      var url = Uri.parse('$baseUrl/employee?SelectedDate=$today');
+      Map<String, String> headers = {
+        'Authorization': 'Bearer ${await authRepository.getToken()}',
+        'Content-Type': 'application/json',
+      };
       final response = await http.get(url, headers: headers);
-
       if (response.statusCode == 200) {
-        return {'data': jsonDecode(response.body)};
+        return ScheduleResponse.fromJson(json.decode(response.body));
       } else {
-        return {
-          'error': 'Failed to fetch schedules',
-          'statusCode': response.statusCode
-        };
+        throw Exception('Failed to load schedule: ${response.statusCode}');
       }
     } catch (e) {
-      return {'error': 'An error occurred: $e'};
+      throw Exception('Error: $e');
     }
   }
 }

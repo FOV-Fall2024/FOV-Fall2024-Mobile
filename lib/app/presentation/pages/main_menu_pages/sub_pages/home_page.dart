@@ -1,13 +1,19 @@
 import 'dart:ui';
+import 'dart:async';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_analog_clock/flutter_analog_clock.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/take_attendance_page.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/setting_page.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/commands/home_page_command.dart';
-import 'package:flutter_analog_clock/flutter_analog_clock.dart';
-import 'dart:async';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/location_service.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,17 +21,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  AuthRepository authRepository = AuthRepository();
-  late Future<bool> futureMatch;
+  final authRepository = GetIt.I<IAuthRepository>();
+  final attendanceRepository = GetIt.I<IAttendanceRepository>();
+  final storageService = GetIt.I<IStorageService>();
+  late Future<AttendanceStatus> futureMatch;
   Timer? _timer;
   String? _fullName;
-
+  final _locationService = LocationService();
+  double? _latitude;
+  double? _longitude;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
     futureMatch = AttendanceShiftService().isUserCheckIn();
-
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {});
     });
@@ -36,6 +46,94 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _fullName = fullName ?? 'Unknown User';
     });
+  }
+
+  Future<void> _fetchLocation() async {
+    bool hasPermission = await _locationService.checkLocationPermissions();
+    if (!hasPermission) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enable location services.')),
+      );
+      return;
+    }
+    Position position = await _locationService.getCurrentPosition();
+    setState(() {
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+    });
+  }
+
+  Future<void> _handleCheckout() async {
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
+    setState(() {
+      isLoading = true;
+    });
+
+    await _fetchLocation();
+
+    if (_latitude == null || _longitude == null) {
+      setState(() {
+        isLoading = false;
+      });
+      _showStatusDialog(false, 'Unable to retrieve location.');
+      return;
+    }
+
+    try {
+      String? shiftId = await storageService.read("currentShift");
+      final date = dateFormat.format(DateTime.now());
+
+      final response = await attendanceRepository.checkOut(
+        shiftId.toString(),
+        date,
+        _latitude!,
+        _longitude!,
+      );
+
+      if (response['success'] == true) {
+        _showStatusDialog(true, response['message'] ?? 'Check-out successful!');
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        _showStatusDialog(false, response['error'] ?? 'Check-out failed.');
+      }
+    } catch (e) {
+      _showStatusDialog(false, 'An error occurred: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _showStatusDialog(bool isSuccess, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Icon(
+            isSuccess ? Icons.check_circle : Icons.error,
+            color: isSuccess ? Colors.green : Colors.red,
+            size: 60,
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (isSuccess) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.mainMenu);
+                }
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -152,63 +250,78 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       SizedBox(height: 30),
-                      FutureBuilder<bool>(
+                      FutureBuilder<AttendanceStatus>(
                         future: futureMatch,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return CircularProgressIndicator();
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
                           } else if (snapshot.hasError) {
-                            return Text(
-                              'Error checking attendance.',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.red,
+                            return Center(
+                              child: Text(
+                                'Error: ${snapshot.error}',
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.red),
                               ),
                             );
                           } else if (snapshot.hasData) {
-                            bool isChecked = snapshot.data!;
-                            return Column(
-                              children: [
-                                Text(
-                                  'Attendance Status: ${isChecked ? "Checked" : "Not Yet"}',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isChecked ? Colors.green : Colors.amber,
-                                  ),
-                                ),
-                                SizedBox(height: 30),
-                                ElevatedButton(
-                                  onPressed: isChecked
-                                      ? null
-                                      : () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      TakeAttendancePage()));
-                                        },
-                                  child: Text(
-                                    'Take Attendance',
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.white),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets.all(15),
-                                    backgroundColor: isChecked
-                                        ? Colors.grey
-                                        : Colors.lightBlue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                            switch (snapshot.data) {
+                              case AttendanceStatus.noSchedule:
+                                return textWithWhiteBackground(
+                                    'No shift assigned to you for the next 30 minutes',
+                                    Colors.black);
+                              case AttendanceStatus.userIsCheckIn:
+                                return Column(
+                                  children: [
+                                    textWithWhiteBackground(
+                                        'Attendance Status: Checked',
+                                        Colors.green),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _handleCheckout();
+                                      },
+                                      child: Text('Check out'),
                                     ),
-                                  ),
-                                ),
-                              ],
-                            );
+                                  ],
+                                );
+                              case AttendanceStatus.userIsNotCheckIn:
+                                return Column(
+                                  children: [
+                                    textWithWhiteBackground(
+                                        'Attendance Status: Not Checked In',
+                                        Colors.amber),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TakeAttendancePage()),
+                                        );
+                                      },
+                                      child: Text('Take Attendance'),
+                                    ),
+                                  ],
+                                );
+                              case AttendanceStatus.noShiftMatch:
+                                return textWithWhiteBackground(
+                                    'No Shift Found.\nPlease contact your manager.',
+                                    Colors.red);
+                              case null:
+                                return textWithWhiteBackground(
+                                    'No Shift Found.\nPlease contact your manager.',
+                                    Colors.red);
+                            }
                           }
-                          return SizedBox.shrink();
+                          return Center(
+                            child: Text(
+                              'Unknown Status',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          );
                         },
                       ),
                     ],
@@ -221,4 +334,20 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+Widget textWithWhiteBackground(String txtString, Color txtColor) {
+  return Container(
+    padding: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10), color: Colors.white60),
+    child: Text(
+      txtString,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 20,
+        color: txtColor,
+      ),
+    ),
+  );
 }

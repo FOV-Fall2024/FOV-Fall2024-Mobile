@@ -54,18 +54,20 @@ class WaiterSchedule {
   String id;
   Employee employee;
   Shift shift;
+  bool isCheckIn;
 
   WaiterSchedule({
     required this.id,
     required this.employee,
     required this.shift,
+    required this.isCheckIn,
   });
 
   factory WaiterSchedule.fromJson(Map<String, dynamic> json) => WaiterSchedule(
-        id: json["id"],
-        employee: Employee.fromJson(json["employee"]),
-        shift: Shift.fromJson(json["shift"]),
-      );
+      id: json["id"],
+      employee: Employee.fromJson(json["employee"]),
+      shift: Shift.fromJson(json["shift"]),
+      isCheckIn: json["isCheckIn"]);
 }
 
 class Employee {
