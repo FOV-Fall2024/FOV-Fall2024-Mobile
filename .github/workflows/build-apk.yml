@@ -8,7 +8,7 @@ name: facs_mobile
       - main
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: [self-hosted, some-label]
     steps:
       - name: Set Up Java
         uses: actions/setup-java@v4
