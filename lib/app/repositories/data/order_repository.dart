@@ -10,20 +10,19 @@ class OrderRepository implements IOrderRepository {
   final AuthRepository authRepository = AuthRepository();
 
   //Get all orders
+  @override
   Future<List<OrderItem>> getOrders() async {
     final url = Uri.parse(_baseUrl);
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await authRepository.getToken()}',
     };
-
     try {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final List<dynamic>? results = data['results'];
-
         // Map the results to a list of OrderItem objects
         if (results != null) {
           List<OrderItem> orders =
@@ -37,7 +36,6 @@ class OrderRepository implements IOrderRepository {
             'Finish',
             'Canceled'
           ];
-
           // Sort orders based on the predefined status order
           orders.sort((a, b) {
             int aIndex = statusOrder.indexOf(a.orderStatus);
@@ -59,6 +57,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //View order details
+  @override
   Future<OrderDetail> getOrderDetailById(String id) async {
     final url = Uri.parse('$_baseUrl/$id/details');
     final headers = {
@@ -81,6 +80,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Confirm order and transfer to headchef
+  @override
   Future<String> confirmOrder(String id) async {
     final url = Uri.parse('$_baseUrl/$id/cook');
     final headers = {
@@ -103,6 +103,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Cancel order
+  @override
   Future<String> cancelOrder(String id) async {
     final url = Uri.parse('$_baseUrl/$id/cancel');
     final headers = {
@@ -125,6 +126,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Cancel order
+  @override
   Future<String> cancelAddMore(String id) async {
     final url = Uri.parse('$_baseUrl/$id/cancel-add-more');
     final headers = {
@@ -147,6 +149,7 @@ class OrderRepository implements IOrderRepository {
   }
 
   //Refund item in order
+  @override
   Future<String> refundOrder({
     required String orderId,
     required String orderDetailId,
@@ -173,38 +176,10 @@ class OrderRepository implements IOrderRepository {
     }
   }
 
-  //Serve refundable dish
-  //Deprecated
-  Future<String> serveRefundableDish(
-      {required String orderId, required String orderDetailsId}) async {
-    final url =
-        '$_baseUrl/$orderId/refundable-dish?orderDetailsId=$orderDetailsId';
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await authRepository.getToken()}',
-    };
-
-    try {
-      final response = await http.patch(
-        Uri.parse(url),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        return response.body;
-      } else {
-        return response.statusCode.toString();
-      }
-    } catch (e) {
-      throw Exception('An error occurred: $e');
-    }
-  }
-
   //Serve cooked food tranfer from headchef
   //Also used to serve refundable dish to customer
-  //NEED REFACTOR
-  Future<String> serveCookedDish(
+  @override
+  Future<String> serveDish(
       {required String orderId, required String orderDetailsId}) async {
     final url = '$_baseUrl/$orderId/serve?orderDetailsId=$orderDetailsId';
 

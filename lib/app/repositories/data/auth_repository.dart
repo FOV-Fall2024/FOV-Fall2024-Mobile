@@ -3,7 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/fcm_token_repository.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,9 +16,11 @@ class AuthRepository implements IAuthRepository {
   final String _fullName = '_fullName';
   final String _employeeId = '_employeeId';
   final String _restaurantId = '_restaurantId';
+  final String _role = '_role';
 
   ///API related section
   // Login
+  @override
   Future<Map<String, dynamic>> login(String code, String password) async {
     final url = Uri.parse('$_baseUrl/login');
     final headers = {'Content-Type': 'application/json'};
@@ -27,7 +28,6 @@ class AuthRepository implements IAuthRepository {
 
     try {
       final response = await http.post(url, headers: headers, body: body);
-
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         final fcmToken = await _firebaseMessaging.getToken();
@@ -51,6 +51,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   // Change password
+  @override
   Future<Map<String, dynamic>> changePassword(
       String oldPassword, String newPassword, String confirmPassword) async {
     final url = Uri.parse('$_baseUrl/change-password');
@@ -80,6 +81,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   // View (current) profile detail
+  @override
   Future<Map<String, dynamic>> profileDetail() async {
     final url = Uri.parse('$_baseUrl/me');
     final headers = {
@@ -103,6 +105,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   // Edit profile
+  @override
   Future<Map<String, dynamic>> editProfile(
       String address, String lastName, String firstName) async {
     final url = Uri.parse('$_baseUrl/edit-profile');
@@ -133,35 +136,48 @@ class AuthRepository implements IAuthRepository {
 
   /// Flutter secure storage relate section
   // Store user info
+  @override
   Future<void> storeUserInfo(Map<String, dynamic> metadata) async {
     await _storageService.write(_tokenKey, metadata['accessToken']);
     await _storageService.write(_fullName, metadata['fullName']);
     await _storageService.write(_employeeId, metadata['id']);
+    await _storageService.write(_role, metadata['role']);
   }
 
   // Getter for storage
+  @override
   Future<String?> getToken() async {
     return await _storageService.read(_tokenKey);
   }
 
+  @override
   Future<String?> getFullname() async {
     return await _storageService.read(_fullName);
   }
 
+  @override
   Future<String?> getUserId() async {
     return await _storageService.read(_employeeId);
   }
 
+  @override
   Future<String?> getRestaurantId() async {
     return await _storageService.read(_restaurantId);
   }
 
+  @override
+  Future<String?> getRole() async {
+    return await _storageService.read(_role);
+  }
+
   // Delete token
+  @override
   Future<void> deleteToken() async {
     await _storageService.delete(_tokenKey);
   }
 
   // Delete all token (for log out)
+  @override
   Future<void> deleteAllToken() async {
     await _storageService.deleteAll();
   }

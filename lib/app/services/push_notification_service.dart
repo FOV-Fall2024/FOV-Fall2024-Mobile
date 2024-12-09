@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/services/redis_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/main.dart';
 import 'package:get_it/get_it.dart';
 

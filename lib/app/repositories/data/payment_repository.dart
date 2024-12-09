@@ -10,16 +10,15 @@ class PaymentRepository implements IPaymentRepository {
   final AuthRepository authRepository = AuthRepository();
 
   //Get all payment
+  @override
   Future<List<PaymentItem>> getPayment(String orderId) async {
     final url = Uri.parse('$_baseUrl?OrderId=$orderId');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await authRepository.getToken()}'
     };
-
     try {
       final response = await http.get(url, headers: headers);
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         List<PaymentItem> payments =
@@ -34,6 +33,7 @@ class PaymentRepository implements IPaymentRepository {
   }
 
   //Confirm pay by cash
+  @override
   Future<String> confirmPayByCash(String id) async {
     final url = Uri.parse('$_baseUrl/$id/confirm');
     final headers = {
@@ -43,7 +43,6 @@ class PaymentRepository implements IPaymentRepository {
 
     try {
       final response = await http.patch(url, headers: headers);
-
       if (response.statusCode == 200) {
         return response.body;
       } else {

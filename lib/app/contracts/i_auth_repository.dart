@@ -11,6 +11,7 @@ abstract class IAuthRepository {
   Future<String?> getFullname();
   Future<String?> getUserId();
   Future<String?> getRestaurantId();
+  Future<String?> getRole();
   Future<void> deleteToken();
   Future<void> deleteAllToken();
 }

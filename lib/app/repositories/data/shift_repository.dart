@@ -7,15 +7,14 @@ import 'package:http/http.dart' as http;
 class ShiftRepository implements IShiftRepository {
   final String _baseUrl = 'http://vktrng.ddns.net:8080/api/Shift';
 
+  @override
   Future<List<Shifts>> getShifts() async {
     final url = Uri.parse(_baseUrl);
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await AuthRepository().getToken()}'
     };
-
     final response = await http.get(url, headers: headers);
-
     if (response.statusCode == 200) {
       List<dynamic> shiftList = json.decode(response.body);
       return shiftList.map((shift) => Shifts.fromJson(shift)).toList();

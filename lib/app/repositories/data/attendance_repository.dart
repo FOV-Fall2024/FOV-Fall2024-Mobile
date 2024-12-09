@@ -8,6 +8,7 @@ class AttendanceRepository implements IAttendanceRepository {
   final authRepository = AuthRepository();
   final String baseUrl = "http://vktrng.ddns.net:8080/api/Attendance";
 
+  @override
   Future<AttendanceResponse> fetchDailyAttendance() async {
     final response = await http.get(Uri.parse('$baseUrl/daily'));
 
@@ -18,6 +19,7 @@ class AttendanceRepository implements IAttendanceRepository {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> checkIn(String qrCodeData, String userId,
       double latitude, double longitude) async {
     Uri url = Uri.parse(qrCodeData);
@@ -27,7 +29,6 @@ class AttendanceRepository implements IAttendanceRepository {
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
     });
-
     try {
       final response = await http.post(url, headers: headers, body: body);
 
@@ -61,6 +62,7 @@ class AttendanceRepository implements IAttendanceRepository {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> checkOut(
       String shiftId, String date, double latitude, double longitude) async {
     try {

@@ -270,13 +270,13 @@ class _HomePageState extends State<HomePage> {
                             switch (snapshot.data) {
                               case AttendanceStatus.noSchedule:
                                 return textWithWhiteBackground(
-                                    'No shift assigned to you for the next 30 minutes',
+                                    'No shift assigned to you for the next 15 minutes',
                                     Colors.black);
                               case AttendanceStatus.userIsCheckIn:
                                 return Column(
                                   children: [
                                     textWithWhiteBackground(
-                                        'Attendance Status: Checked',
+                                        'Attendance Status:\nChecked In',
                                         Colors.green),
                                     ElevatedButton(
                                       onPressed: () {
@@ -290,8 +290,8 @@ class _HomePageState extends State<HomePage> {
                                 return Column(
                                   children: [
                                     textWithWhiteBackground(
-                                        'Attendance Status: Not Checked In',
-                                        Colors.amber),
+                                        'Attendance Status:\nNot Checked In',
+                                        Colors.deepOrangeAccent),
                                     ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(
@@ -344,10 +344,8 @@ Widget textWithWhiteBackground(String txtString, Color txtColor) {
     child: Text(
       txtString,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 20,
-        color: txtColor,
-      ),
+      style:
+          TextStyle(fontSize: 24, color: txtColor, fontWeight: FontWeight.bold),
     ),
   );
 }

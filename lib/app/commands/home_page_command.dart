@@ -3,6 +3,7 @@ import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_reposi
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_shift_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/shift_entity.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/view_model/shift_view_model.dart';
 import 'package:get_it/get_it.dart';
 
 enum AttendanceStatus {
@@ -37,7 +38,7 @@ class AttendanceShiftService {
             checkOutTime: null,
             waiterSchedule: WaiterSchedule(
                 id: "",
-                employee: Employee(
+                employee: Employees(
                     employeeId: "",
                     employeeCode: "",
                     employeeName: "",

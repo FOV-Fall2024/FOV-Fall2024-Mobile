@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 class ScheduleRepository implements IScheduleRepository {
   final String baseUrl = 'http://vktrng.ddns.net:8080/api/Schedule';
+  @override
   Future<ScheduleResponse> getCurrentWeekSchedule() async {
     try {
       final authRepository = GetIt.I<IAuthRepository>();

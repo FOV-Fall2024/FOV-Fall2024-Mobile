@@ -1,4 +1,4 @@
-import 'dart:convert';
+import './view_model/shift_view_model.dart';
 
 class AttendanceResponse {
   int pageNumber;
@@ -52,7 +52,7 @@ class Attendance {
 
 class WaiterSchedule {
   String id;
-  Employee employee;
+  Employees employee;
   Shift shift;
   bool isCheckIn;
 
@@ -65,43 +65,28 @@ class WaiterSchedule {
 
   factory WaiterSchedule.fromJson(Map<String, dynamic> json) => WaiterSchedule(
       id: json["id"],
-      employee: Employee.fromJson(json["employee"]),
+      employee: Employees.fromJson(json["employee"]),
       shift: Shift.fromJson(json["shift"]),
       isCheckIn: json["isCheckIn"]);
 }
 
-class Employee {
+class Employees {
   String employeeId;
   String employeeCode;
   String employeeName;
   String waiterScheduleId;
 
-  Employee({
+  Employees({
     required this.employeeId,
     required this.employeeCode,
     required this.employeeName,
     required this.waiterScheduleId,
   });
 
-  factory Employee.fromJson(Map<String, dynamic> json) => Employee(
+  factory Employees.fromJson(Map<String, dynamic> json) => Employees(
         employeeId: json["employeeId"],
         employeeCode: json["employeeCode"],
         employeeName: json["employeeName"],
         waiterScheduleId: json["waiterScheduleId"],
-      );
-}
-
-class Shift {
-  String shiftId;
-  String shiftName;
-
-  Shift({
-    required this.shiftId,
-    required this.shiftName,
-  });
-
-  factory Shift.fromJson(Map<String, dynamic> json) => Shift(
-        shiftId: json["shiftId"],
-        shiftName: json["shiftName"],
       );
 }

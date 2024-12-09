@@ -12,8 +12,6 @@ abstract class IOrderRepository {
     required String orderDetailId,
     required int refundQuantity,
   });
-  Future<String> serveRefundableDish(
-      {required String orderId, required String orderDetailsId});
-  Future<String> serveCookedDish(
+  Future<String> serveDish(
       {required String orderId, required String orderDetailsId});
 }

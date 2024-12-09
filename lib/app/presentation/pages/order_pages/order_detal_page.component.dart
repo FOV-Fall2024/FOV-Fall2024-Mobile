@@ -3,8 +3,10 @@ import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_order_repository.
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_payment_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/paymentItem.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/order_page.component.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/payment_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/order_page.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
@@ -20,22 +22,10 @@ class OrderItemTile extends StatelessWidget {
       required this.orderStatus,
       required this.item})
       : super(key: key);
-
-  Future<void> _serveRefundableDishToCustomer(OrderDetailItem item) async {
-    try {
-      String response;
-      response = await orderRepository.serveCookedDish(
-          orderId: orderId, orderDetailsId: item.id);
-      print('Refundable dish served: $response');
-    } catch (e) {
-      print('An error occurred while serving the dish: $e');
-    }
-  }
-
   Future<void> _serveCookedDishToCustomer(OrderDetailItem item) async {
     try {
       String response;
-      response = await orderRepository.serveCookedDish(
+      response = await orderRepository.serveDish(
           orderId: orderId, orderDetailsId: item.id);
       print('Cooked dish served: $response');
     } catch (e) {
@@ -56,7 +46,7 @@ class OrderItemTile extends StatelessWidget {
               child: Text(
                 item.status,
                 style: TextStyle(
-                  color: Colors.green,
+                  color: getStatusColor(item.status),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -141,13 +131,13 @@ class OrderItemTile extends StatelessWidget {
                 ),
               ),
             if (orderStatus == 'Cook' &&
-                item.status == 'Prepare' &&
+                item.status == 'Cook' &&
                 item.isRefund == true)
               Align(
                 alignment: Alignment.bottomRight,
                 child: OutlinedButton(
                   onPressed: () async {
-                    await _serveRefundableDishToCustomer(item);
+                    await _serveCookedDishToCustomer(item);
                   },
                   child: const Text('Serve refundable to Customer'),
                 ),
@@ -340,9 +330,9 @@ class OrderActions extends StatelessWidget {
           child:
               Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
           style: OutlinedButton.styleFrom(
-            backgroundColor: color,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
+              side: const BorderSide(color: Colors.red),
             ),
             padding: const EdgeInsets.symmetric(vertical: 15),
           ),

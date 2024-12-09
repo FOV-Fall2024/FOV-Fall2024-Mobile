@@ -1,19 +1,56 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_salary_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/salary_entity.dart';
 import 'package:intl/intl.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_shift_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_schedule_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/shift_entity.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/view_model/shift_view_model.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/schedule_pages/payroll_detail_page.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/entities/schedule_entity.dart';
 
-class SchedulePage extends StatelessWidget {
-  // Temporary attendance status
-  final List<bool> attendanceStatus = [
-    false,
-    true,
-    false,
-    true,
-    false,
-    false,
-    false
-  ];
+class SchedulePage extends StatefulWidget {
+  @override
+  _SchedulePageState createState() => _SchedulePageState();
+}
+
+class _SchedulePageState extends State<SchedulePage> {
+  late Future<ScheduleResponse> _scheduleFuture;
+  final scheduleRepository = GetIt.I<IScheduleRepository>();
+  final salaryRepository = GetIt.I<ISalaryRepository>();
+  final attendanceRepository = GetIt.I<IAttendanceRepository>();
+  final shiftRepository = GetIt.I<IShiftRepository>();
+  final authRepository = GetIt.I<IAuthRepository>();
+
+  DateTime _selectedDate = DateTime.now();
+  late Future<EmployeeResponse> _salaryFuture;
+  @override
+  void initState() {
+    super.initState();
+    _scheduleFuture = scheduleRepository.getCurrentWeekSchedule();
+    _updateSalaryFuture();
+  }
+
+  void _updateSalaryFuture() {
+    String formattedDate = DateFormat('yyyy-MM').format(_selectedDate);
+    _salaryFuture = salaryRepository.fetchSalaryForEmployee(formattedDate);
+  }
+
+  void _changeMonth(int offset) {
+    setState(() {
+      _selectedDate = DateTime(
+        _selectedDate.year,
+        _selectedDate.month + offset,
+      );
+      _updateSalaryFuture();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +71,8 @@ class SchedulePage extends StatelessWidget {
               color: Colors.white.withOpacity(0.4),
             ),
           ),
-          Padding(
+          SingleChildScrollView(
+            // Wrap the Column in SingleChildScrollView
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,9 +84,37 @@ class SchedulePage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                _buildWeekCalendar(),
+                FutureBuilder<ScheduleResponse>(
+                  future: _scheduleFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      return _buildWeekCalendar(snapshot.data!.results);
+                    } else {
+                      return Text('No data available.');
+                    }
+                  },
+                ),
                 Divider(height: 40),
-                _buildTodayShiftSection(),
+                FutureBuilder<ScheduleResponse>(
+                  future: _scheduleFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      return _buildTodayShiftSection();
+                    } else {
+                      return Text('No data available.');
+                    }
+                  },
+                ),
+                Divider(height: 40),
+                _buildPayrollSection(),
                 SizedBox(height: 16),
               ],
             ),
@@ -58,7 +124,7 @@ class SchedulePage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeekCalendar() {
+  Widget _buildWeekCalendar(List<ScheduleItem> scheduleItems) {
     DateTime now = DateTime.now();
     DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
 
@@ -67,7 +133,17 @@ class SchedulePage extends StatelessWidget {
       children: List.generate(7, (index) {
         DateTime day = startOfWeek.add(Duration(days: index));
         bool isToday = day.isSameDay(now);
-        bool hasAttendance = attendanceStatus[index];
+        ScheduleItem? matchingItem = scheduleItems.firstWhere(
+          (item) => DateTime.parse(item.date).isSameDay(day),
+          orElse: () => ScheduleItem(
+            id: '',
+            shift: Shift(shiftId: '', shiftName: 'No Shift'),
+            date: '',
+            createdDate: '',
+          ),
+        );
+
+        bool hasAttendance = matchingItem.id.isNotEmpty;
 
         return Column(
           children: [
@@ -122,84 +198,219 @@ class SchedulePage extends StatelessWidget {
   }
 
   Widget _buildTodayShiftSection() {
-    //Placeholder, need api to get details
-    String shiftStartTime = '7:00';
-    String shiftEndTime = '17:00';
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        attendanceRepository.fetchDailyAttendance(),
+        shiftRepository.getShifts(),
+        authRepository.getUserId(),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          final attendance = snapshot.data![0] as AttendanceResponse;
+          final shifts = snapshot.data![1] as List<Shifts>;
+          final userId = snapshot.data![2] as String;
+          shifts.sort((a, b) => a.startTime.compareTo(b.startTime));
+          // get only current user
+          final userAttendance = attendance.results.where((att) {
+            return att.waiterSchedule.employee.employeeId == userId;
+          }).toList();
+          final attendanceMap = {
+            for (var att in userAttendance)
+              att.waiterSchedule.shift.shiftId: att
+          };
 
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Today\'s Shifts',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: shifts.map((shift) {
+                  final matchingAttendance = attendanceMap[shift.id] ??
+                      Attendance(
+                        id: "",
+                        checkInTime: null,
+                        checkOutTime: null,
+                        waiterSchedule: WaiterSchedule(
+                          id: "",
+                          employee: Employees(
+                            employeeId: "",
+                            employeeCode: "",
+                            employeeName: "",
+                            waiterScheduleId: "",
+                          ),
+                          shift: Shift(shiftId: "", shiftName: ""),
+                          isCheckIn: false,
+                        ),
+                        createdDate: DateTime.now(),
+                      );
+                  Color shiftColor = _determineShiftColor(matchingAttendance);
+
+                  return Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: shiftColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        shift.shiftName,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          );
+        } else {
+          return Text('No data available.');
+        }
+      },
+    );
+  }
+
+  Widget _buildPayrollSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Today Shift',
+          'Payroll by Period',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Start',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      shiftStartTime,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    SizedBox(width: 15),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 4),
-                      height: 30,
-                      width: 2,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(
-                      'End',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      shiftEndTime,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            IconButton(
+              icon: Icon(Icons.arrow_left),
+              onPressed: () => _changeMonth(-1),
+            ),
+            Text(
+              DateFormat('MMMM yyyy').format(_selectedDate),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.arrow_right),
+              onPressed: () => _changeMonth(1),
             ),
           ],
         ),
+        FutureBuilder<EmployeeResponse>(
+          future: _salaryFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (snapshot.hasData && snapshot.data!.results.isNotEmpty) {
+              final employee = snapshot.data!.results.first;
+              final salary = employee.salary;
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSalaryRow('Employee Name:', employee.employeeName),
+                      _buildSalaryRow(
+                          'Total Shifts:', salary.totalShifts.toString()),
+                      _buildSalaryRow('Total Hours Worked:',
+                          salary.totalHoursWorked.toString()),
+                      _buildSalaryRow(
+                        'Penalty:',
+                        NumberFormat.currency(locale: 'vi_VN', symbol: 'VND')
+                            .format(salary.penalty),
+                      ),
+                      _buildSalaryRow(
+                        'Total Salaries:',
+                        NumberFormat.currency(locale: 'vi_VN', symbol: 'VND')
+                            .format(salary.totalSalaries),
+                        bold: true,
+                      ),
+                      SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PayrollDetailPage(
+                                selectedDate: _selectedDate,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text('View Attendance Details'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return Text('No payroll data available.');
+            }
+          },
+        ),
       ],
     );
+  }
+
+  Widget _buildSalaryRow(String label, String value, {bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 16),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _determineShiftColor(Attendance attendance) {
+    if (attendance.id.isEmpty) {
+      return Colors.grey;
+    } else if (attendance.waiterSchedule.isCheckIn) {
+      return Colors.green;
+    } else {
+      return Colors.red;
+    }
   }
 }
 

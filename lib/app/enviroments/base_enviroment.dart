@@ -1,4 +1,6 @@
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_salary_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/salary_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:get_it/get_it.dart';
 //Interfaces
@@ -28,6 +30,7 @@ void setupDependencyInjection() {
   getIt.registerLazySingleton<IPaymentRepository>(() => PaymentRepository());
   getIt.registerLazySingleton<IScheduleRepository>(() => ScheduleRepository());
   getIt.registerLazySingleton<IShiftRepository>(() => ShiftRepository());
+  getIt.registerLazySingleton<ISalaryRepository>(() => SalaryRepository());
   //Services
   getIt.registerLazySingleton<IStorageService>(() => StorageService());
 }

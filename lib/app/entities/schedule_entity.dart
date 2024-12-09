@@ -1,3 +1,5 @@
+import './view_model/shift_view_model.dart';
+
 class ScheduleResponse {
   final int pageNumber;
   final int pageSize;
@@ -47,23 +49,6 @@ class ScheduleItem {
       shift: Shift.fromJson(json['shift']),
       date: json['date'],
       createdDate: json['createdDate'],
-    );
-  }
-}
-
-class Shift {
-  final String shiftId;
-  final String shiftName;
-
-  Shift({
-    required this.shiftId,
-    required this.shiftName,
-  });
-
-  factory Shift.fromJson(Map<String, dynamic> json) {
-    return Shift(
-      shiftId: json['shiftId'],
-      shiftName: json['shiftName'],
     );
   }
 }
