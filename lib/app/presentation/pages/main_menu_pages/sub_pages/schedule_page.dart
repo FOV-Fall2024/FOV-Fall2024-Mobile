@@ -256,16 +256,14 @@ class _SchedulePageState extends State<SchedulePage> {
                   Color shiftColor = _determineShiftColor(matchingAttendance);
 
                   return Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: shiftColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                        child: Column(
-                      children: [
-                        Text(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: shiftColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
                           shift.shiftName,
                           style: TextStyle(
                             color: Colors.white,
@@ -274,18 +272,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        Text(
-                          '${timeFormat.format(DateTime.parse(shift.startTime))} - ${timeFormat.format(DateTime.parse(shift.endTime))}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    )),
-                  );
+                      ));
                 }).toList(),
               ),
             ],
