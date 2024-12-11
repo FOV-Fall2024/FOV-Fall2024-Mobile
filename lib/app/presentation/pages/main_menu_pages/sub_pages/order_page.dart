@@ -29,6 +29,10 @@ class _OrderPageState extends State<OrderPage> {
     });
   }
 
+  void refreshPage() {
+    setState(() {});
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -65,10 +69,11 @@ class _OrderPageState extends State<OrderPage> {
                 Text('Filter', style: TextStyle(fontSize: 20)),
                 DropdownButton<String>(
                   value: selectedStatus,
-                  items: [
+                  items: const [
                     DropdownMenuItem(value: 'all', child: Text('All')),
                     DropdownMenuItem(value: 'Prepare', child: Text('Prepare')),
                     DropdownMenuItem(value: 'Cook', child: Text('Cook')),
+                    DropdownMenuItem(value: 'Cooked', child: Text('Cooked')),
                     DropdownMenuItem(value: 'Service', child: Text('Service')),
                     DropdownMenuItem(value: 'Payment', child: Text('Payment')),
                     DropdownMenuItem(value: 'Finish', child: Text('Finish')),
@@ -76,11 +81,11 @@ class _OrderPageState extends State<OrderPage> {
                         value: 'Canceled', child: Text('Canceled')),
                   ],
                   onChanged: _onStatusChanged,
-                  hint: Text('Select Status'),
+                  hint: const Text('Select Status'),
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Orders list
             Expanded(
@@ -88,11 +93,11 @@ class _OrderPageState extends State<OrderPage> {
                 future: orders,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No orders found'));
+                    return const Center(child: Text('No orders found'));
                   }
 
                   final orderList = snapshot.data!;

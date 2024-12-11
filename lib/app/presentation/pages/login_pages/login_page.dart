@@ -157,7 +157,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
-
     if (response['success'] == true) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Login successful')));

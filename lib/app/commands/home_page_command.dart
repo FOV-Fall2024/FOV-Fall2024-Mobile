@@ -13,6 +13,13 @@ enum AttendanceStatus {
   userIsNotCheckIn
 }
 
+enum CheckoutStatus {
+  noSchedule,
+  noShiftMatch,
+  userIsCheckOut,
+  userIsNotCheckOut
+}
+
 class AttendanceShiftService {
   final shiftRepository = GetIt.I<IShiftRepository>();
   final attendanceRepository = GetIt.I<IAttendanceRepository>();
@@ -62,15 +69,60 @@ class AttendanceShiftService {
     }
   }
 
+  Future<CheckoutStatus> isUserCheckOut() async {
+    try {
+      List<Shifts> shifts = await shiftRepository.getShifts();
+      AttendanceResponse attendanceResponse =
+          await attendanceRepository.fetchDailyAttendance();
+      DateTime now = DateTime.now();
+      Shifts? currentShift = _findCurrentShift(shifts, now);
+
+      //if no shift matches the current time
+      if (currentShift == null) {
+        return CheckoutStatus.noSchedule;
+      }
+      var attendance = attendanceResponse.results.firstWhere(
+        (a) => a.waiterSchedule.shift.shiftId == currentShift.id,
+        //create dummy for no match case
+        orElse: () => Attendance(
+            id: "",
+            checkInTime: null,
+            checkOutTime: null,
+            waiterSchedule: WaiterSchedule(
+                id: "",
+                employee: Employees(
+                    employeeId: "",
+                    employeeCode: "",
+                    employeeName: "",
+                    waiterScheduleId: ""),
+                shift: Shift(shiftId: "", shiftName: ""),
+                isCheckIn: false),
+            createdDate: DateTime.now()),
+      );
+      if (attendance.id.isEmpty) {
+        return CheckoutStatus.noSchedule;
+      } else if (attendance.checkOutTime != null) {
+        return CheckoutStatus.userIsCheckOut;
+      } else if (attendance.checkOutTime == null) {
+        return CheckoutStatus.userIsNotCheckOut;
+      } else {
+        return CheckoutStatus.noShiftMatch;
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to process attendance and shift data.');
+    }
+  }
+
   Shifts? _findCurrentShift(List<Shifts> shifts, DateTime now) {
     for (Shifts shift in shifts) {
       DateTime startTime = _combineDateAndTime(now, shift.startTime);
       DateTime endTime = _combineDateAndTime(now, shift.endTime);
-      if (endTime.isBefore(startTime)) {
-        endTime = endTime.add(const Duration(days: 1)); // End time is next day
-      }
-      if (now.isAfter(startTime.subtract(const Duration(minutes: 30))) &&
-          now.isBefore(endTime)) {
+      // if (endTime.isBefore(startTime)) {
+      //   endTime = endTime.add(const Duration(days: 1)); // End time is next day
+      // }
+      if (now.isAfter(startTime.subtract(Duration(minutes: 30))) &&
+          now.isBefore(endTime.add(Duration(minutes: 29)))) {
         return shift;
       }
     }

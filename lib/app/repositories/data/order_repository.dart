@@ -27,12 +27,22 @@ class OrderRepository implements IOrderRepository {
         if (results != null) {
           List<OrderItem> orders =
               results.map((item) => OrderItem.fromJson(item)).toList();
-
+          //default order status
+          // const List<String> statusOrder = [
+          //   'Prepare',
+          //   'Payment',
+          //   'Cook',
+          //   'Cooked',
+          //   'Service',
+          //   'Finish',
+          //   'Canceled'
+          // ];
           const List<String> statusOrder = [
-            'Prepare',
             'Payment',
-            'Cook',
+            'Cooked',
+            'Prepare',
             'Service',
+            'Cook',
             'Finish',
             'Canceled'
           ];

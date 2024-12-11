@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   late Future<AttendanceStatus> futureMatch;
   Timer? _timer;
   String? _fullName;
+  String? _userRole;
   final _locationService = LocationService();
   double? _latitude;
   double? _longitude;
@@ -43,8 +44,10 @@ class _HomePageState extends State<HomePage> {
 
   void _loadUserInfo() async {
     final fullName = await authRepository.getFullname();
+    final role = await authRepository.getRole();
     setState(() {
       _fullName = fullName ?? 'Unknown User';
+      _userRole = role ?? 'Unknown Role';
     });
   }
 
@@ -94,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         _showStatusDialog(true, response['message'] ?? 'Check-out successful!');
         Navigator.pushReplacementNamed(context, '/login');
       } else {
-        _showStatusDialog(false, response['error'] ?? 'Check-out failed.');
+        _showStatusDialog(false, response['error'] ?? 'Check-out failed!');
       }
     } catch (e) {
       _showStatusDialog(false, 'An error occurred: $e');
@@ -212,7 +215,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Text(
-                                    'Waiter',
+                                    _userRole ?? 'Loading...',
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.grey,
@@ -226,12 +229,13 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.notifications),
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.notification);
-                      },
-                    ),
+                    //Unused
+                    // IconButton(
+                    //   icon: Icon(Icons.notifications),
+                    //   onPressed: () {
+                    //     Navigator.pushNamed(context, AppRoutes.notification);
+                    //   },
+                    // ),
                   ],
                 ),
                 SizedBox(height: 80),
@@ -270,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                             switch (snapshot.data) {
                               case AttendanceStatus.noSchedule:
                                 return textWithWhiteBackground(
-                                    'No shift assigned to you for the next 15 minutes',
+                                    'No shift assigned to you for the next 15 minutes\nPlease check Schedule page to see today shift.',
                                     Colors.black);
                               case AttendanceStatus.userIsCheckIn:
                                 return Column(

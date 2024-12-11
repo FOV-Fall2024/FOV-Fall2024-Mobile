@@ -167,6 +167,7 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<String?> getRole() async {
+    print(await _storageService.read(_role));
     return await _storageService.read(_role);
   }
 

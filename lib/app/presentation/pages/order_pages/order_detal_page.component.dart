@@ -81,13 +81,13 @@ class OrderItemTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Qty: ${item.quantity}',
+                        'Qty: ${item.quantity - item.refundQuantity}',
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      if (item.note != null && item.note.isNotEmpty)
+                      if (item.note.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
@@ -118,28 +118,15 @@ class OrderItemTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            if (orderStatus == 'Cook' &&
-                item.status == 'Cooked' &&
-                item.isRefund == false)
+            if ((orderStatus == 'Cook' || orderStatus == 'Cooked') &&
+                item.status == 'Cooked')
               Align(
                 alignment: Alignment.bottomRight,
                 child: OutlinedButton(
                   onPressed: () async {
                     await _serveCookedDishToCustomer(item);
                   },
-                  child: const Text('Serve cooked dish to Customer'),
-                ),
-              ),
-            if (orderStatus == 'Cook' &&
-                item.status == 'Cook' &&
-                item.isRefund == true)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: OutlinedButton(
-                  onPressed: () async {
-                    await _serveCookedDishToCustomer(item);
-                  },
-                  child: const Text('Serve refundable to Customer'),
+                  child: const Text('Serve dish'),
                 ),
               ),
           ],
@@ -200,15 +187,17 @@ class OrderActions extends StatelessWidget {
       isButtonPressed = true;
     }
     //Return refundable items
-    else if (action == "refund") {
-      _showRefundDialog(context);
-    } else {
+    //directly call inside the modal to make the scaffold working
+    // else if (action == "refund") {
+    //   _showRefundDialog(context);
+    // }
+    else {
       return;
     }
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //       content: Text(response != '500' ? successMessage : failureMessage)),
-    // );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(response != '500' ? successMessage : failureMessage)),
+    );
   }
 
   void _showRefundDialog(BuildContext context) {
@@ -268,13 +257,24 @@ class OrderActions extends StatelessWidget {
             () => _handleOrderAction(context, 'cancelAddMore'),
           ),
         if (orderStatus == "Service")
-          _buildActionButton(
-            context,
-            'Return item',
-            isButtonPressed ? Colors.grey : Colors.green,
-            isButtonPressed,
-            false,
-            () => _handleOrderAction(context, 'refund'),
+          // _buildActionButton(
+          //   context,
+          //   'Return item',
+          //   isButtonPressed ? Colors.grey : Colors.green,
+          //   isButtonPressed,
+          //   false,
+          //   () => _handleOrderAction(context, 'refund'),
+          // ),
+          ElevatedButton(
+            onPressed: () => _showRefundDialog(context),
+            child: Text('Return item'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ),
           ),
         if (orderStatus == "Payment")
           Column(
@@ -283,7 +283,7 @@ class OrderActions extends StatelessWidget {
               _BuildPaymentWidget(orderId: orderDetail.orderId),
               _buildActionButton(
                 context,
-                'Confirm receive money from customer',
+                'Confirm receiving payment',
                 isButtonPressed ? Colors.grey : Colors.blue,
                 isButtonPressed,
                 false,
@@ -304,14 +304,14 @@ class OrderActions extends StatelessWidget {
 
   Widget _buildActionButton(BuildContext context, String text, Color color,
       bool isButtonPressed, bool isButtonCancel, VoidCallback onPressed) {
-    if (isButtonCancel == false)
+    if (isButtonCancel == false) {
       return Container(
         padding: const EdgeInsets.all(16.0),
         width: double.infinity,
         child: ElevatedButton(
           onPressed: isButtonPressed ? null : onPressed,
           child:
-              Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
+              Text(text, style: TextStyle(fontSize: 18, color: Colors.orange)),
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
             shape: RoundedRectangleBorder(
@@ -321,14 +321,12 @@ class OrderActions extends StatelessWidget {
           ),
         ),
       );
-    else
+    } else {
       return Container(
         padding: const EdgeInsets.all(16.0),
         width: double.infinity,
         child: OutlinedButton(
           onPressed: isButtonPressed ? null : onPressed,
-          child:
-              Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -336,8 +334,11 @@ class OrderActions extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(vertical: 15),
           ),
+          child: Text(text,
+              style: const TextStyle(fontSize: 18, color: Colors.white)),
         ),
       );
+    }
   }
 }
 
@@ -455,7 +456,7 @@ class _RefundItemsListState extends State<_RefundItemsList> {
 
     if (itemsToRefund.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Processing refunds...")),
+        const SnackBar(content: Text("Processing refunds...")),
       );
       for (var item in itemsToRefund) {
         final int refundQuantity = adjustedRefundQuantities[item.id] ?? 0;
@@ -468,19 +469,19 @@ class _RefundItemsListState extends State<_RefundItemsList> {
           );
           if (response == '200') {
             print("Successfully refunded item: ${item.productName}");
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   SnackBar(
-            //       content:
-            //           Text("Successfully refunded item: ${item.productName}")),
-            // );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text("Successfully refunded item: ${item.productName}")),
+            );
             Navigator.pop(context, 1);
           } else {
             print(
                 "Failed to refund item: ${item.productName}, Response: $response");
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   SnackBar(
-            //       content: Text("Failed to refund item: ${item.productName}")),
-            // );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text("Failed to refund item: ${item.productName}")),
+            );
           }
         } catch (e) {
           print(

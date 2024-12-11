@@ -74,14 +74,14 @@ class ItemCard extends StatelessWidget {
   }
 }
 
-Color getStatusColor(String status) {
+Color? getStatusColor(String status) {
   switch (status) {
     case 'Prepare':
       return Colors.deepOrangeAccent;
     case 'Cook':
       return Colors.amber;
     case 'Cooked':
-      return Colors.yellow;
+      return Colors.yellowAccent[400];
     case 'Service':
       return Colors.redAccent;
     case 'Payment':

@@ -158,11 +158,9 @@ class _SchedulePageState extends State<SchedulePage> {
                 height: 45,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isToday
+                  color: hasAttendance
                       ? Colors.lightGreen
-                      : hasAttendance
-                          ? Colors.green
-                          : Colors.red.withOpacity(0.3),
+                      : Colors.grey.withOpacity(0.3),
                   border: Border.all(
                     color: isToday
                         ? Colors.blue
@@ -222,7 +220,7 @@ class _SchedulePageState extends State<SchedulePage> {
             for (var att in userAttendance)
               att.waiterSchedule.shift.shiftId: att
           };
-
+          var timeFormat = DateFormat("HH:mm");
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -265,16 +263,28 @@ class _SchedulePageState extends State<SchedulePage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: Text(
-                        shift.shiftName,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        child: Column(
+                      children: [
+                        Text(
+                          shift.shiftName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                        Text(
+                          '${timeFormat.format(DateTime.parse(shift.startTime))} - ${timeFormat.format(DateTime.parse(shift.endTime))}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )),
                   );
                 }).toList(),
               ),

@@ -18,22 +18,14 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
   final MobileScannerController controller = MobileScannerController();
   StreamSubscription<Object?>? _subscription;
   bool scanned = false;
+  bool isLoading = false;
   RespondStatus rs = RespondStatus(status: false, message: '');
   final _locationService = LocationService();
-  //QR attribute
   double? _latitude;
   double? _longitude;
   String? _userId = '';
 
   final attendanceRepository = AttendanceRepository();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _subscription = controller.barcodes.listen(_handleBarcode);
-    controller.start();
-  }
 
   // Barcode handling function
   void _handleBarcode(BarcodeCapture capture) async {
@@ -42,7 +34,9 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
     if (qrCodeData != null && !scanned) {
       setState(() {
         scanned = true;
+        isLoading = true;
       });
+
       await _fetchLocation();
       await _fetchUserId();
 
@@ -60,28 +54,16 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
           );
 
           if (response['success'] == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(response['message'] ?? 'Check-in successful!')),
-            );
             setState(() {
               rs = RespondStatus.success(
                   response['message'] ?? 'Check-in successful!');
             });
           } else {
-            String errorMessage = response['error'] ?? 'Check-in failed.';
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage)),
-            );
             setState(() {
-              rs = RespondStatus.error(errorMessage);
+              rs = RespondStatus.error(response['error'] ?? 'Check-in failed.');
             });
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Missing location or user ID for check-in.')),
-          );
           setState(() {
             rs = RespondStatus(
                 status: false,
@@ -90,10 +72,13 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
           });
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
+        setState(() {
+          rs = RespondStatus.error('An error occurred: $e');
+        });
       } finally {
+        setState(() {
+          isLoading = false;
+        });
         controller.stop();
       }
     }
@@ -107,8 +92,6 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
       );
       return;
     }
-
-    // Get current position
     Position position = await _locationService.getCurrentPosition();
     setState(() {
       _latitude = position.latitude;
@@ -146,101 +129,105 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
 
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(
-        onWillPop: () async => false,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              if (!scanned)
-                MobileScanner(
-                  controller: controller,
-                ),
-              if (!scanned)
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 250,
-                          height: 250,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blue, width: 4),
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            if (!scanned)
+              MobileScanner(
+                controller: controller,
+              ),
+            if (!scanned)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 250,
+                        height: 250,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blue, width: 4),
+                        ),
+                      ),
+                      SizedBox(height: 100),
+                      const Card(
+                        margin: EdgeInsets.all(20),
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            'Scan QR code provided by your manager to take attendance',
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        SizedBox(height: 100),
-                        Card(
-                          margin: EdgeInsets.all(20),
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Text(
-                              'Scan QR code provided by your manager to take attendance',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-
-              // Scanned Status and Return Button
-              if (scanned)
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+              ),
+            if (scanned)
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isLoading) CircularProgressIndicator(),
+                      if (!isLoading)
                         Icon(
                           rs.status ? Icons.check_circle : Icons.cancel,
                           color: rs.status ? Colors.green : Colors.red,
                           size: 100,
                         ),
-                        SizedBox(height: 20),
-                        Text(
-                          rs.message,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                      SizedBox(height: 20),
+                      Text(
+                        isLoading ? 'Processing, please wait...' : rs.message,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 40),
+                      if (!isLoading && rs.status)
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.mainMenu,
+                            );
+                          },
+                          child: Text('Return to Home Screen'),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
+                          ),
                         ),
-                        SizedBox(height: 40),
-                        if (rs.status)
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(
-                                  context, AppRoutes.mainMenu);
-                            },
-                            child: Text('Return to Home Screen'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                            ),
+                      if (!isLoading && !rs.status)
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TakeAttendancePage(),
+                              ),
+                            );
+                          },
+                          child: Text('Take attendance again'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
                           ),
-                        if (!rs.status)
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TakeAttendancePage()));
-                            },
-                            child: Text('Take attendance again'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                            ),
-                          ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ));
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
