@@ -25,15 +25,15 @@ class Employee {
 }
 
 class Salary {
-  final int totalShifts;
-  final int totalHoursWorked;
-  final int actualHoursWorked;
+  final double totalShifts;
+  final double totalHoursWorked;
+  final double actualHoursWorked;
   final double regularSalary;
   final double overtimeSalary;
   final double penalty;
   final double totalSalaries;
-  final int overtimeHours;
-  final int penaltyHours;
+  final double overtimeHours;
+  final double penaltyHours;
   final List<AttendanceDetails> attendanceDetailsDtos;
 
   Salary({
@@ -55,15 +55,15 @@ class Salary {
         .toList();
 
     return Salary(
-      totalShifts: json['totalShifts'],
-      totalHoursWorked: json['totalHoursWorked'],
-      actualHoursWorked: json['actualHoursWorked'],
+      totalShifts: double.parse(json['totalShifts'].toString()),
+      totalHoursWorked: double.parse(json['totalHoursWorked'].toString()),
+      actualHoursWorked: double.parse(json['actualHoursWorked'].toString()),
       regularSalary: double.parse(json['regularSalary'].toString()),
       overtimeSalary: double.parse(json['overtimeSalary'].toString()),
       penalty: double.parse(json['penalty'].toString()),
       totalSalaries: double.parse(json['totalSalaries'].toString()),
-      overtimeHours: json['overtimeHours'],
-      penaltyHours: json['penaltyHours'],
+      overtimeHours: double.parse(json['overtimeHours'].toString()),
+      penaltyHours: double.parse(json['penaltyHours'].toString()),
       attendanceDetailsDtos: attendanceList,
     );
   }

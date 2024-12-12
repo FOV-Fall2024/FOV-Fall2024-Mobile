@@ -200,7 +200,6 @@ class _SchedulePageState extends State<SchedulePage> {
       future: Future.wait([
         attendanceRepository.fetchDailyAttendance(),
         shiftRepository.getShifts(),
-        authRepository.getUserId(),
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -210,14 +209,9 @@ class _SchedulePageState extends State<SchedulePage> {
         } else if (snapshot.hasData) {
           final attendance = snapshot.data![0] as AttendanceResponse;
           final shifts = snapshot.data![1] as List<Shifts>;
-          final userId = snapshot.data![2] as String;
           shifts.sort((a, b) => a.startTime.compareTo(b.startTime));
-          // get only current user
-          final userAttendance = attendance.results.where((att) {
-            return att.waiterSchedule.employee.employeeId == userId;
-          }).toList();
           final attendanceMap = {
-            for (var att in userAttendance)
+            for (var att in attendance.results)
               att.waiterSchedule.shift.shiftId: att
           };
           var timeFormat = DateFormat("HH:mm");
@@ -256,8 +250,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   Color shiftColor = _determineShiftColor(matchingAttendance);
 
                   return Container(
-                      width: 70,
-                      height: 70,
+                      width: 90,
+                      height: 90,
                       decoration: BoxDecoration(
                         color: shiftColor,
                         borderRadius: BorderRadius.circular(8),
@@ -267,7 +261,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           shift.shiftName,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -340,6 +334,12 @@ class _SchedulePageState extends State<SchedulePage> {
                           'Total Shifts:', salary.totalShifts.toString()),
                       _buildSalaryRow('Total Hours Worked:',
                           salary.totalHoursWorked.toString()),
+                      _buildSalaryRow('Actual Hours Worked:',
+                          salary.actualHoursWorked.toString()),
+                      _buildSalaryRow(
+                          'Base salary:', salary.regularSalary.toString()),
+                      _buildSalaryRow(
+                          'Overtime salary:', salary.overtimeSalary.toString()),
                       _buildSalaryRow(
                         'Penalty:',
                         NumberFormat.currency(locale: 'vi_VN', symbol: 'VND')

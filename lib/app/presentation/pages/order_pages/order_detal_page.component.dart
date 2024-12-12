@@ -15,12 +15,14 @@ class OrderItemTile extends StatelessWidget {
   final String orderStatus;
   final OrderDetailItem item;
   final orderRepository = GetIt.I<IOrderRepository>();
+  final VoidCallback onDishServed;
 
   OrderItemTile(
       {Key? key,
       required this.orderId,
       required this.orderStatus,
-      required this.item})
+      required this.item,
+      required this.onDishServed})
       : super(key: key);
   Future<void> _serveCookedDishToCustomer(OrderDetailItem item) async {
     try {
@@ -28,6 +30,7 @@ class OrderItemTile extends StatelessWidget {
       response = await orderRepository.serveDish(
           orderId: orderId, orderDetailsId: item.id);
       print('Cooked dish served: $response');
+      onDishServed();
     } catch (e) {
       print('An error occurred while serving the dish: $e');
     }
@@ -185,13 +188,7 @@ class OrderActions extends StatelessWidget {
       failureMessage = 'Cannot confirm payment!';
       Navigator.pop(context, 1);
       isButtonPressed = true;
-    }
-    //Return refundable items
-    //directly call inside the modal to make the scaffold working
-    // else if (action == "refund") {
-    //   _showRefundDialog(context);
-    // }
-    else {
+    } else {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
@@ -257,14 +254,6 @@ class OrderActions extends StatelessWidget {
             () => _handleOrderAction(context, 'cancelAddMore'),
           ),
         if (orderStatus == "Service")
-          // _buildActionButton(
-          //   context,
-          //   'Return item',
-          //   isButtonPressed ? Colors.grey : Colors.green,
-          //   isButtonPressed,
-          //   false,
-          //   () => _handleOrderAction(context, 'refund'),
-          // ),
           ElevatedButton(
             onPressed: () => _showRefundDialog(context),
             child: Text('Return item'),
@@ -311,7 +300,7 @@ class OrderActions extends StatelessWidget {
         child: ElevatedButton(
           onPressed: isButtonPressed ? null : onPressed,
           child:
-              Text(text, style: TextStyle(fontSize: 18, color: Colors.orange)),
+              Text(text, style: TextStyle(fontSize: 18, color: Colors.white)),
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
             shape: RoundedRectangleBorder(
@@ -335,7 +324,7 @@ class OrderActions extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 15),
           ),
           child: Text(text,
-              style: const TextStyle(fontSize: 18, color: Colors.white)),
+              style: const TextStyle(fontSize: 18, color: Colors.red)),
         ),
       );
     }

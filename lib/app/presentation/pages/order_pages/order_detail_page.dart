@@ -26,7 +26,13 @@ class _OrderDetailState extends State<OrderDetailPage> {
   @override
   void initState() {
     super.initState();
-    orderDetailFuture = orderRepository.getOrderDetailById(widget.id);
+    _refreshOrderDetails();
+  }
+
+  void _refreshOrderDetails() {
+    setState(() {
+      orderDetailFuture = orderRepository.getOrderDetailById(widget.id);
+    });
   }
 
   @override
@@ -58,7 +64,8 @@ class _OrderDetailState extends State<OrderDetailPage> {
                       ...items.map((item) => OrderItemTile(
                           orderId: widget.id,
                           orderStatus: widget.orderStatus,
-                          item: item)),
+                          item: item,
+                          onDishServed: _refreshOrderDetails)),
                       if (additionalItems.isNotEmpty)
                         ExpansionTile(
                           title: Text(
@@ -67,9 +74,11 @@ class _OrderDetailState extends State<OrderDetailPage> {
                           ),
                           children: additionalItems
                               .map((item) => OrderItemTile(
-                                  orderId: widget.id,
-                                  orderStatus: widget.orderStatus,
-                                  item: item))
+                                    orderId: widget.id,
+                                    orderStatus: widget.orderStatus,
+                                    item: item,
+                                    onDishServed: _refreshOrderDetails,
+                                  ))
                               .toList(),
                         ),
                       Center(

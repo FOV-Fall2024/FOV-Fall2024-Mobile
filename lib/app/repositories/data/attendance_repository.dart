@@ -10,8 +10,12 @@ class AttendanceRepository implements IAttendanceRepository {
 
   @override
   Future<AttendanceResponse> fetchDailyAttendance() async {
-    final response = await http.get(Uri.parse('$baseUrl/daily'));
-
+    final url = Uri.parse('$baseUrl/daily');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await authRepository.getToken()}'
+    };
+    final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
       return AttendanceResponse.fromJson(json.decode(response.body));
     } else {
