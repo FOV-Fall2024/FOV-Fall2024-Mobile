@@ -254,15 +254,20 @@ class OrderActions extends StatelessWidget {
             () => _handleOrderAction(context, 'cancelAddMore'),
           ),
         if (orderStatus == "Service")
-          ElevatedButton(
-            onPressed: () => _showRefundDialog(context),
-            child: Text('Return item'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _showRefundDialog(context),
+              child: Text('Return item',
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 15),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 15),
             ),
           ),
         if (orderStatus == "Payment")
