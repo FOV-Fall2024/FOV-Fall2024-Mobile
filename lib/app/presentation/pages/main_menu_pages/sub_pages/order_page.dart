@@ -1,9 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/orderItem.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/order_page.component.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/order_pages/order_detail_page.dart';
+import 'package:get_it/get_it.dart';
 
 class OrderPage extends StatefulWidget {
   @override
@@ -11,7 +12,7 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  final OrderRepository orderRepository = OrderRepository();
+  final orderRepository = GetIt.I<IOrderRepository>();
   late Future<List<OrderItem>> orders;
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   String? selectedStatus = 'all';

@@ -73,71 +73,77 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 100),
-              Text(
-                'Welcome!!',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 40),
-              TextField(
-                controller: _securityCodeController,
-                decoration: InputDecoration(
-                  labelText: 'Security Code',
-                  hintText: 'Enter your security code',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15))),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15))),
-                ),
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        _rememberMe = newValue!;
-                      });
-                    },
+    return WillPopScope(
+      onWillPop: () async {
+        // Return false to disable back button functionality
+        return false;
+      },
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 100),
+                Text(
+                  'Welcome!!',
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Text('Remember me'),
-                ],
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Login',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[300],
-                  minimumSize: Size(double.infinity, 50),
                 ),
-              ),
-            ],
+                SizedBox(height: 40),
+                TextField(
+                  controller: _securityCodeController,
+                  decoration: InputDecoration(
+                    labelText: 'Security Code',
+                    hintText: 'Enter your security code',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                  ),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'Enter your password',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _rememberMe,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          _rememberMe = newValue!;
+                        });
+                      },
+                    ),
+                    Text('Remember me'),
+                  ],
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Login',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[300],
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

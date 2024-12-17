@@ -1,6 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_auth_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/presentation/pages/main_menu_pages/sub_pages/background_image_by_time.dart';
-import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/auth_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/presentation/routes.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/push_notification_service.dart';
+import 'package:get_it/get_it.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -9,7 +13,7 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
   String? _fullName;
-  final AuthRepository authRepository = AuthRepository();
+  final authRepository = GetIt.I<IAuthRepository>();
   bool isLoading = false;
 
   @override
@@ -61,6 +65,23 @@ class _SettingPageState extends State<SettingPage> {
                     leading: Icon(Icons.edit),
                     title: Text('Edit Profile'),
                     onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 32),
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.logout),
+                    title: Text('Log Out'),
+                    onTap: () {
+                      authRepository.deleteAllToken();
+                      FirebaseMessaging.instance.deleteToken().then(
+                          (value) => FirebaseMessaging.instance.getToken());
+                      Navigator.pushReplacementNamed(context, AppRoutes.login);
+                    },
                   ),
                 ],
               ),

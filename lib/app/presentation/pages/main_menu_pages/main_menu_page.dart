@@ -78,32 +78,38 @@ class _MainMenuPageState extends State<MainMenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              children: _pages,
-              physics: NeverScrollableScrollPhysics(),
-            ),
-      bottomNavigationBar: _tabItems.isEmpty
-          ? SizedBox.shrink()
-          : ConvexAppBar(
-              items: _tabItems,
-              initialActiveIndex: _selectedIndex,
-              onTap: _onItemTapped,
-              style: _tabItems.length.isOdd
-                  ? TabStyle.fixedCircle
-                  : TabStyle.reactCircle,
-              color: Colors.grey,
-              backgroundColor: Colors.white,
-              activeColor: Colors.orange,
-            ),
+    return WillPopScope(
+      onWillPop: () async {
+        // Return false to disable back button functionality
+        return false;
+      },
+      child: Scaffold(
+        body: _pages.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                children: _pages,
+                physics: NeverScrollableScrollPhysics(),
+              ),
+        bottomNavigationBar: _tabItems.isEmpty
+            ? SizedBox.shrink()
+            : ConvexAppBar(
+                items: _tabItems,
+                initialActiveIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                style: _tabItems.length.isOdd
+                    ? TabStyle.fixedCircle
+                    : TabStyle.reactCircle,
+                color: Colors.grey,
+                backgroundColor: Colors.white,
+                activeColor: Colors.orange,
+              ),
+      ),
     );
   }
 }

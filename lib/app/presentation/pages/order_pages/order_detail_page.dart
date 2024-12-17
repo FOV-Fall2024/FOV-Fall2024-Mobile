@@ -31,7 +31,17 @@ class _OrderDetailState extends State<OrderDetailPage> {
 
   void _refreshOrderDetails() {
     setState(() {
-      orderDetailFuture = orderRepository.getOrderDetailById(widget.id);
+      orderDetailFuture =
+          orderRepository.getOrderDetailById(widget.id).then((orderDetail) {
+        final allItemsService =
+            orderDetail.orderDetails.every((item) => item.status == "Service");
+
+        if (allItemsService) {
+          Navigator.pop(context);
+        }
+
+        return orderDetail;
+      });
     });
   }
 

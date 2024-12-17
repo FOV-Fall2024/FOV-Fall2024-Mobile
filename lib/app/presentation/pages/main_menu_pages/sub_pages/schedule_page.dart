@@ -214,7 +214,11 @@ class _SchedulePageState extends State<SchedulePage> {
             for (var att in attendance.results)
               att.waiterSchedule.shift.shiftId: att
           };
-          var timeFormat = DateFormat("HH:mm");
+
+          // Formatter for parsing and reformatting time strings
+          final timeParser = DateFormat("HH:mm:ss");
+          final timeFormatter = DateFormat("HH:mm");
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -247,26 +251,50 @@ class _SchedulePageState extends State<SchedulePage> {
                         ),
                         createdDate: DateTime.now(),
                       );
+
                   Color shiftColor = _determineShiftColor(matchingAttendance);
 
+                  // Parse and format startTime and endTime
+                  String startTime = timeFormatter.format(
+                    timeParser.parse(shift.startTime),
+                  );
+                  String endTime = timeFormatter.format(
+                    timeParser.parse(shift.endTime),
+                  );
+
                   return Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: shiftColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Text(
-                          shift.shiftName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: shiftColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            shift.shiftName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ));
+                          SizedBox(height: 4),
+                          Text(
+                            '$startTime - $endTime',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }).toList(),
               ),
             ],

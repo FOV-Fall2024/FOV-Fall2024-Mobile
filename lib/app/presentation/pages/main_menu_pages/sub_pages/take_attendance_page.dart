@@ -156,6 +156,18 @@ class _TakeAttendancePageState extends State<TakeAttendancePage>
                   controller: controller,
                 ),
               if (!scanned)
+                Positioned(
+                  top: 40,
+                  left: 20,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.mainMenu);
+                    },
+                  ),
+                ),
+              if (!scanned)
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(10),
