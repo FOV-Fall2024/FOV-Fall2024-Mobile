@@ -394,13 +394,13 @@ String formatCurrency(int value) {
 
 List<OrderDetailItem> getItems(OrderDetail orderDetail) {
   return orderDetail.orderDetails
-      .where((item) => item.isAddMore == false)
+      .where((item) => item.isAddMore == false && item.status != "Canceled")
       .toList();
 }
 
 List<OrderDetailItem> getAdditionalItems(OrderDetail orderDetail) {
   return orderDetail.orderDetails
-      .where((item) => item.isAddMore == true)
+      .where((item) => item.isAddMore == true && item.status != "Canceled")
       .toList();
 }
 
@@ -423,7 +423,9 @@ class _RefundItemsListState extends State<_RefundItemsList> {
   void initState() {
     super.initState();
     refundableItems = widget.orderDetail.orderDetails.where((item) {
-      return item.isRefund == true && 0 <= item.quantity;
+      return item.isRefund == true &&
+          0 <= item.quantity &&
+          item.status != "Canceled";
     }).toList();
     refundableItems.forEach((item) {
       adjustedRefundQuantities[item.id] = (item.quantity - item.refundQuantity);

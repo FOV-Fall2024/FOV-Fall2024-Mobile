@@ -33,10 +33,10 @@ class _OrderDetailState extends State<OrderDetailPage> {
     setState(() {
       orderDetailFuture =
           orderRepository.getOrderDetailById(widget.id).then((orderDetail) {
-        final allItemsService =
-            orderDetail.orderDetails.every((item) => item.status == "Service");
+        final allItemsService = orderDetail.orderDetails.every(
+            (item) => item.status == "Service" && item.status != "Canceled");
 
-        if (allItemsService) {
+        if (allItemsService && widget.orderStatus != "Payment") {
           Navigator.pop(context);
         }
 
