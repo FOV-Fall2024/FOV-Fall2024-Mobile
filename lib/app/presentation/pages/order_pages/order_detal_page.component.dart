@@ -415,29 +415,45 @@ class _RefundItemsList extends StatefulWidget {
 }
 
 class _RefundItemsListState extends State<_RefundItemsList> {
-  List<OrderDetailItem> refundableItems = [];
+  List<OrderDetailItem> refundableNormalItems = [];
+  List<OrderDetailItem> refundableAdditionalItems = [];
   Map<String, int> adjustedRefundQuantities = {};
   final orderRepository = GetIt.I<IOrderRepository>();
 
   @override
   void initState() {
     super.initState();
-    refundableItems = widget.orderDetail.orderDetails.where((item) {
+
+    // Separate normal items and additional items
+    refundableNormalItems = widget.orderDetail.orderDetails.where((item) {
       return item.isRefund == true &&
-          0 <= item.quantity &&
+          item.isAddMore == false &&
           item.status != "Canceled";
     }).toList();
-    refundableItems.forEach((item) {
-      adjustedRefundQuantities[item.id] = (item.quantity - item.refundQuantity);
-    });
+
+    refundableAdditionalItems = widget.orderDetail.orderDetails.where((item) {
+      return item.isRefund == true &&
+          item.isAddMore == true &&
+          item.status != "Canceled";
+    }).toList();
+
+    // Initialize refund quantities
+    for (var item in refundableNormalItems) {
+      adjustedRefundQuantities[item.id] = item.refundQuantity ?? 0;
+    }
+    for (var item in refundableAdditionalItems) {
+      adjustedRefundQuantities[item.id] = item.refundQuantity ?? 0;
+    }
   }
 
   void _updateRefundQuantity(String itemId, int newQuantity) {
     setState(() {
       if (newQuantity >= 0 &&
           newQuantity <=
-              refundableItems
-                  .firstWhere((item) => item.id == itemId)
+              refundableNormalItems
+                  .firstWhere((item) => item.id == itemId,
+                      orElse: () => refundableAdditionalItems
+                          .firstWhere((item) => item.id == itemId))
                   .quantity) {
         adjustedRefundQuantities[itemId] = newQuantity;
       }
@@ -445,10 +461,16 @@ class _RefundItemsListState extends State<_RefundItemsList> {
   }
 
   void _confirmRefund() async {
-    List<OrderDetailItem> itemsToRefund = refundableItems.where((item) {
+    List<OrderDetailItem> itemsToRefund = [];
+    itemsToRefund.addAll(refundableNormalItems.where((item) {
       int adjustedQuantity = adjustedRefundQuantities[item.id] ?? 0;
       return adjustedQuantity > 0;
-    }).toList();
+    }));
+
+    itemsToRefund.addAll(refundableAdditionalItems.where((item) {
+      int adjustedQuantity = adjustedRefundQuantities[item.id] ?? 0;
+      return adjustedQuantity > 0;
+    }));
 
     if (itemsToRefund.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -470,7 +492,6 @@ class _RefundItemsListState extends State<_RefundItemsList> {
                   content:
                       Text("Successfully refunded item: ${item.productName}")),
             );
-            Navigator.pop(context, 1);
           } else {
             print(
                 "Failed to refund item: ${item.productName}, Response: $response");
@@ -485,55 +506,66 @@ class _RefundItemsListState extends State<_RefundItemsList> {
         }
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Refund process completed.")),
+        const SnackBar(content: Text("Refund process completed.")),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("No items selected for refund")),
+        const SnackBar(content: Text("No items selected for refund")),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...refundableItems.map((item) {
-          int adjustedQuantity = adjustedRefundQuantities[item.id] ??
-              (item.quantity - item.refundQuantity);
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Normal Items",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          ...refundableNormalItems.map((item) => _buildRefundItemRow(item)),
+          const Divider(),
+          const Text(
+            "Additional Items",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          ...refundableAdditionalItems.map((item) => _buildRefundItemRow(item)),
+          ElevatedButton(
+            onPressed: _confirmRefund,
+            child: const Text('Confirm Refund'),
+          ),
+        ],
+      ),
+    );
+  }
 
-          return ListTile(
-            title: Text(item.productName ?? 'Unknown Product'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: adjustedQuantity > 0
-                      ? () =>
-                          _updateRefundQuantity(item.id, adjustedQuantity - 1)
-                      : null,
-                ),
-                Text(adjustedQuantity.toString()),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: adjustedQuantity <
-                          (item.quantity - item.refundQuantity)
-                      ? () =>
-                          _updateRefundQuantity(item.id, adjustedQuantity + 1)
-                      : null,
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-        ElevatedButton(
-          onPressed: _confirmRefund,
-          child: Text('Confirm Refund'),
-        ),
-      ],
+  Widget _buildRefundItemRow(OrderDetailItem item) {
+    int adjustedQuantity =
+        adjustedRefundQuantities[item.id] ?? item.refundQuantity;
+
+    return ListTile(
+      title: Text(item.productName ?? 'Unknown Product'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: adjustedQuantity > 0
+                ? () => _updateRefundQuantity(item.id, adjustedQuantity - 1)
+                : null,
+          ),
+          Text(adjustedQuantity.toString()),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: adjustedQuantity < item.quantity
+                ? () => _updateRefundQuantity(item.id, adjustedQuantity + 1)
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }
