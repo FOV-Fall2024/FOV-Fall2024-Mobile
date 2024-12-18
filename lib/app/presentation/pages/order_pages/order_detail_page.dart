@@ -37,7 +37,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
             (item) => item.status == "Service" && item.status != "Canceled");
 
         if (allItemsService && widget.orderStatus != "Payment") {
-          Navigator.pop(context);
+          Navigator.pop(context, 1);
         }
 
         return orderDetail;
