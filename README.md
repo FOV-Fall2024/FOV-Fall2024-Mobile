@@ -57,4 +57,3 @@ A new Flutter project.
 
 ## Todos
  - [ ]  Add cron for check out user
- - [ ]  Add more field under attendance page: payroll by period

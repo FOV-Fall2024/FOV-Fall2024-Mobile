@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/shift_cron_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,7 @@ void main() async {
   await Firebase.initializeApp();
   PushNotificationService().generateDeviceRecogitionToken();
   await PushNotificationService.localNotiInit();
+  ShiftCronService shiftCronService = ShiftCronService();
 
   //Listen to background notifications
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
@@ -50,6 +52,7 @@ void main() async {
       navigatorKey.currentState!.pushNamed("/message", arguments: message);
     });
   }
+  shiftCronService.scheduleShiftCheck();
 
   runApp(const MainApp());
 }
