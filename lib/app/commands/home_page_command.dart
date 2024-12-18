@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_attendance_repository.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_shift_repository.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/contracts/i_storage_service.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/shift_entity.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/attendance_entity.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/view_model/shift_view_model.dart';
+import 'package:fov_fall2024_waiter_mobile_app/app/services/storage_service.dart';
 import 'package:get_it/get_it.dart';
 
 enum AttendanceStatus {
@@ -23,6 +25,8 @@ enum CheckoutStatus {
 class AttendanceShiftService {
   final shiftRepository = GetIt.I<IShiftRepository>();
   final attendanceRepository = GetIt.I<IAttendanceRepository>();
+  final storageService = GetIt.I<IStorageService>();
+  String _currentShiftId = "currentShiftId";
 
   Future<AttendanceStatus> isUserCheckIn() async {
     try {
@@ -31,7 +35,8 @@ class AttendanceShiftService {
           await attendanceRepository.fetchDailyAttendance();
       DateTime now = DateTime.now();
       Shifts? currentShift = _findCurrentShift(shifts, now);
-
+      String currentShiftId = currentShift?.id ?? '';
+      await storageService.write(_currentShiftId, currentShiftId);
       //if no shift matches the current time
       if (currentShift == null) {
         return AttendanceStatus.noSchedule;
@@ -121,8 +126,8 @@ class AttendanceShiftService {
       // if (endTime.isBefore(startTime)) {
       //   endTime = endTime.add(const Duration(days: 1)); // End time is next day
       // }
-      if (now.isAfter(startTime.subtract(Duration(minutes: 30))) &&
-          now.isBefore(endTime.add(Duration(minutes: 29)))) {
+      if (now.isAfter(startTime.subtract(Duration(minutes: 5))) &&
+          now.isBefore(endTime)) {
         return shift;
       }
     }

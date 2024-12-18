@@ -24,7 +24,8 @@ class _HomePageState extends State<HomePage> {
   final authRepository = GetIt.I<IAuthRepository>();
   final attendanceRepository = GetIt.I<IAttendanceRepository>();
   final storageService = GetIt.I<IStorageService>();
-  late Future<AttendanceStatus> futureMatch;
+  late Future<AttendanceStatus> futureMatchCheckIn;
+  late Future<CheckoutStatus> futureMatchCheckOut;
   Timer? _timer;
   String? _fullName;
   String? _userRole;
@@ -36,7 +37,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadUserInfo();
-    futureMatch = AttendanceShiftService().isUserCheckIn();
+    futureMatchCheckIn = AttendanceShiftService().isUserCheckIn();
+    futureMatchCheckOut = AttendanceShiftService().isUserCheckOut();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {});
     });
@@ -83,7 +85,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      String? shiftId = await storageService.read("currentShift");
+      String? shiftId = await storageService.read("currentShiftId");
       final date = dateFormat.format(DateTime.now());
 
       final response = await attendanceRepository.checkOut(
@@ -95,7 +97,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response['success'] == true) {
         _showStatusDialog(true, response['message'] ?? 'Check-out successful!');
-        Navigator.pushReplacementNamed(context, '/login');
+        setState(() {});
       } else {
         _showStatusDialog(false, response['error'] ?? 'Check-out failed!');
       }
@@ -255,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(height: 30),
                       FutureBuilder<AttendanceStatus>(
-                        future: futureMatch,
+                        future: futureMatchCheckIn,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {

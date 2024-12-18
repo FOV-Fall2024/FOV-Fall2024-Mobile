@@ -92,7 +92,7 @@ class AttendanceRepository implements IAttendanceRepository {
         final decodedBody = utf8.decode(response.bodyBytes);
         final responseData = jsonDecode(decodedBody);
         String errorMessage =
-            responseData['message'] ?? 'Unknown error occurred';
+            (responseData['message']) ?? 'Unknown error occurred';
         return {
           'success': false,
           'error': errorMessage,

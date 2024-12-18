@@ -127,7 +127,8 @@ class _OrderPageState extends State<OrderPage> {
                         },
                         child: ItemCard(
                           orderStatus: order.orderStatus,
-                          orderTime: DateTime.parse(order.orderTime),
+                          orderTime: DateTime.parse(order.orderTime)
+                              .add(Duration(hours: 7)),
                           tableNo: order.tableNumber,
                         ),
                       );
