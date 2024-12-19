@@ -30,22 +30,27 @@ class _OrderDetailState extends State<OrderDetailPage> {
   }
 
   void _refreshOrderDetails() {
-    setState(() {
-      orderDetailFuture =
-          orderRepository.getOrderDetailById(widget.id).then((orderDetail) {
-        final allItemsService = orderDetail.orderDetails
-            .where((item) => item.status != "Canceled")
-            .every((item) => item.status == "Service");
+    if (widget.orderStatus != 'Canceled') {
+      setState(() {
+        orderDetailFuture =
+            orderRepository.getOrderDetailById(widget.id).then((orderDetail) {
+          final allItemsService = orderDetail.orderDetails
+              .where((item) => item.status != "Canceled")
+              .every((item) => item.status == "Service");
 
-        if (allItemsService &&
-            (widget.orderStatus != "Service" &&
-                widget.orderStatus != "Payment")) {
-          Navigator.pop(context, 1);
-        }
+          if (allItemsService &&
+              (widget.orderStatus != "Service" &&
+                  widget.orderStatus != "Payment")) {
+            Navigator.pop(context, 1);
+          }
 
-        return orderDetail;
+          return orderDetail;
+        });
       });
-    });
+    } else
+      setState(() {
+        orderDetailFuture = orderRepository.getOrderDetailById(widget.id);
+      });
   }
 
   @override

@@ -476,35 +476,39 @@ class _RefundItemsListState extends State<_RefundItemsList> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Processing refunds...")),
       );
+
       for (var item in itemsToRefund) {
         final int refundQuantity = adjustedRefundQuantities[item.id] ?? 0;
-
-        try {
-          final response = await orderRepository.refundOrder(
-            orderId: widget.orderDetail.orderId,
-            orderDetailId: item.id,
-            refundQuantity: refundQuantity,
-          );
-          if (response == '200') {
-            print("Successfully refunded item: ${item.productName}");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content:
-                      Text("Successfully refunded item: ${item.productName}")),
+        if (refundQuantity > 0) {
+          try {
+            final response = await orderRepository.refundOrder(
+              orderId: widget.orderDetail.orderId,
+              orderDetailId: item.id,
+              refundQuantity: refundQuantity,
             );
-          } else {
+            if (response == '200') {
+              print("Successfully refunded item: ${item.productName}");
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text(
+                        "Successfully refunded item: ${item.productName}")),
+              );
+            } else {
+              print(
+                  "Failed to refund item: ${item.productName}, Response: $response");
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text("Failed to refund item: ${item.productName}")),
+              );
+            }
+          } catch (e) {
             print(
-                "Failed to refund item: ${item.productName}, Response: $response");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text("Failed to refund item: ${item.productName}")),
-            );
+                "An error occurred while refunding item: ${item.productName}, Error: $e");
           }
-        } catch (e) {
-          print(
-              "An error occurred while refunding item: ${item.productName}, Error: $e");
         }
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Refund process completed.")),
       );
