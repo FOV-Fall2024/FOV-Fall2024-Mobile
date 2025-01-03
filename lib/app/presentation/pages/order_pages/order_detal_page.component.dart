@@ -145,12 +145,14 @@ class OrderActions extends StatelessWidget {
   final PaymentRepository paymentRepository = PaymentRepository();
   final String orderStatus;
   bool isButtonPressed = false;
+  final VoidCallback onRefresh;
 
   OrderActions({
     Key? key,
     required this.orderDetail,
     required this.orderRepository,
     required this.orderStatus,
+    required this.onRefresh,
   }) : super(key: key);
 
   Future<void> _handleOrderAction(BuildContext context, String action) async {
@@ -205,7 +207,10 @@ class OrderActions extends StatelessWidget {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Refund Items"),
-            content: _RefundItemsList(orderDetail: orderDetail),
+            content: _RefundItemsList(
+              orderDetail: orderDetail,
+              onRefresh: onRefresh,
+            ),
             actions: [
               TextButton(
                 onPressed: () {
@@ -406,8 +411,10 @@ List<OrderDetailItem> getAdditionalItems(OrderDetail orderDetail) {
 
 class _RefundItemsList extends StatefulWidget {
   final OrderDetail orderDetail;
+  final VoidCallback onRefresh;
 
-  const _RefundItemsList({Key? key, required this.orderDetail})
+  const _RefundItemsList(
+      {Key? key, required this.orderDetail, required this.onRefresh})
       : super(key: key);
 
   @override
@@ -439,22 +446,24 @@ class _RefundItemsListState extends State<_RefundItemsList> {
 
     // Initialize refund quantities
     for (var item in refundableNormalItems) {
-      adjustedRefundQuantities[item.id] = item.refundQuantity ?? 0;
+      adjustedRefundQuantities[item.id] = 0;
     }
     for (var item in refundableAdditionalItems) {
-      adjustedRefundQuantities[item.id] = item.refundQuantity ?? 0;
+      adjustedRefundQuantities[item.id] = 0;
     }
   }
 
   void _updateRefundQuantity(String itemId, int newQuantity) {
     setState(() {
-      if (newQuantity >= 0 &&
-          newQuantity <=
-              refundableNormalItems
-                  .firstWhere((item) => item.id == itemId,
-                      orElse: () => refundableAdditionalItems
-                          .firstWhere((item) => item.id == itemId))
-                  .quantity) {
+      final item = refundableNormalItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () =>
+            refundableAdditionalItems.firstWhere((item) => item.id == itemId),
+      );
+
+      final maxRefundableQuantity = item.quantity - item.refundQuantity;
+
+      if (newQuantity >= 0 && newQuantity <= maxRefundableQuantity) {
         adjustedRefundQuantities[itemId] = newQuantity;
       }
     });
@@ -473,10 +482,6 @@ class _RefundItemsListState extends State<_RefundItemsList> {
     }));
 
     if (itemsToRefund.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Processing refunds...")),
-      );
-
       for (var item in itemsToRefund) {
         final int refundQuantity = adjustedRefundQuantities[item.id] ?? 0;
         if (refundQuantity > 0) {
@@ -498,8 +503,8 @@ class _RefundItemsListState extends State<_RefundItemsList> {
                   "Failed to refund item: ${item.productName}, Response: $response");
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content:
-                        Text("Failed to refund item: ${item.productName}")),
+                    content: Text(
+                        "Failed to refund item: ${item.productName}. Message: $response")),
               );
             }
           } catch (e) {
@@ -508,10 +513,10 @@ class _RefundItemsListState extends State<_RefundItemsList> {
           }
         }
       }
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Refund process completed.")),
       );
+      widget.onRefresh();
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

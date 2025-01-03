@@ -176,10 +176,9 @@ class OrderRepository implements IOrderRepository {
       final response = await http.patch(url, headers: headers);
 
       if (response.statusCode == 200) {
-        return response.body;
-      } else {
-        // throw Exception('Failed to refund order: ${response.statusCode}');
         return response.statusCode.toString();
+      } else {
+        return response.body;
       }
     } catch (e) {
       throw Exception('An error occurred: $e');

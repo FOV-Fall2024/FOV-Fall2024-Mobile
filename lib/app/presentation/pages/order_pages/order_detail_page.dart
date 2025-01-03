@@ -38,9 +38,12 @@ class _OrderDetailState extends State<OrderDetailPage> {
               .where((item) => item.status != "Canceled")
               .every((item) => item.status == "Service");
 
-          if (allItemsService &&
-              (widget.orderStatus != "Service" &&
-                  widget.orderStatus != "Payment")) {
+          if (
+              //filter status for each item inside order detail
+              allItemsService &&
+                  //filter status for order
+                  (widget.orderStatus != "Service" &&
+                      widget.orderStatus != "Payment")) {
             Navigator.pop(context, 1);
           }
 
@@ -113,10 +116,10 @@ class _OrderDetailState extends State<OrderDetailPage> {
                   ),
                 ),
                 OrderActions(
-                  orderDetail: orderDetail,
-                  orderRepository: orderRepository,
-                  orderStatus: widget.orderStatus,
-                ),
+                    orderDetail: orderDetail,
+                    orderRepository: orderRepository,
+                    orderStatus: widget.orderStatus,
+                    onRefresh: _refreshOrderDetails),
                 SizedBox(
                   height: 80,
                 )
