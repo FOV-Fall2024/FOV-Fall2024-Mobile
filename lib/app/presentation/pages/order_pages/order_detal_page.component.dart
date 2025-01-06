@@ -144,7 +144,7 @@ class OrderActions extends StatelessWidget {
   final OrderRepository orderRepository;
   final PaymentRepository paymentRepository = PaymentRepository();
   final String orderStatus;
-  final String paymentMethods;
+  final String? paymentMethods;
   bool isButtonPressed = false;
   final VoidCallback onRefresh;
 

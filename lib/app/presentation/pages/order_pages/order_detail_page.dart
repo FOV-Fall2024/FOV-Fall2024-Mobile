@@ -7,7 +7,7 @@ class OrderDetailPage extends StatefulWidget {
   final String id;
   final int tableNumber;
   final String orderStatus;
-  final String paymentMethods;
+  final String? paymentMethods;
 
   const OrderDetailPage({
     Key? key,

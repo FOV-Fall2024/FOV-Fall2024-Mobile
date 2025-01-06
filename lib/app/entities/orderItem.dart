@@ -6,7 +6,7 @@ class OrderItem {
   final dynamic finalAmount;
   final String orderTime;
   final String tableId;
-  final String paymentMethods;
+  final String? paymentMethods;
   final int tableNumber;
   final String customerName;
   final String? phoneNumber;
