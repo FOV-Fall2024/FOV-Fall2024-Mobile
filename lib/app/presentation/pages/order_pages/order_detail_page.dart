@@ -7,12 +7,14 @@ class OrderDetailPage extends StatefulWidget {
   final String id;
   final int tableNumber;
   final String orderStatus;
+  final String paymentMethods;
 
   const OrderDetailPage({
     Key? key,
     required this.id,
     required this.tableNumber,
     required this.orderStatus,
+    required this.paymentMethods,
   }) : super(key: key);
 
   @override
@@ -119,6 +121,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
                     orderDetail: orderDetail,
                     orderRepository: orderRepository,
                     orderStatus: widget.orderStatus,
+                    paymentMethods: widget.paymentMethods,
                     onRefresh: _refreshOrderDetails),
                 SizedBox(
                   height: 80,

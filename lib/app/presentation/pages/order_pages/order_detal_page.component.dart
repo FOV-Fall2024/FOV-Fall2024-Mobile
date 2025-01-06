@@ -144,6 +144,7 @@ class OrderActions extends StatelessWidget {
   final OrderRepository orderRepository;
   final PaymentRepository paymentRepository = PaymentRepository();
   final String orderStatus;
+  final String paymentMethods;
   bool isButtonPressed = false;
   final VoidCallback onRefresh;
 
@@ -153,6 +154,7 @@ class OrderActions extends StatelessWidget {
     required this.orderRepository,
     required this.orderStatus,
     required this.onRefresh,
+    required this.paymentMethods,
   }) : super(key: key);
 
   Future<void> _handleOrderAction(BuildContext context, String action) async {
@@ -275,7 +277,7 @@ class OrderActions extends StatelessWidget {
               ),
             ),
           ),
-        if (orderStatus == "Payment")
+        if (orderStatus == "Payment" && paymentMethods != "VNPay")
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

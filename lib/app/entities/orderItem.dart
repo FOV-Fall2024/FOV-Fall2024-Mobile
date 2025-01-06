@@ -6,6 +6,7 @@ class OrderItem {
   final dynamic finalAmount;
   final String orderTime;
   final String tableId;
+  final String paymentMethods;
   final int tableNumber;
   final String customerName;
   final String? phoneNumber;
@@ -20,6 +21,7 @@ class OrderItem {
     required this.finalAmount,
     required this.orderTime,
     required this.tableId,
+    required this.paymentMethods,
     required this.tableNumber,
     required this.customerName,
     required this.phoneNumber,
@@ -36,6 +38,7 @@ class OrderItem {
       finalAmount: json['finalAmount'],
       orderTime: json['orderTime'],
       tableId: json['tableId'],
+      paymentMethods: json['paymentMethods'],
       tableNumber: json['tableNumber'],
       customerName: json['customerName'],
       phoneNumber: json['phoneNumber'],

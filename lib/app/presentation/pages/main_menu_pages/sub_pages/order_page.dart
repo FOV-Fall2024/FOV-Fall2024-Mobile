@@ -113,10 +113,10 @@ class _OrderPageState extends State<OrderPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => OrderDetailPage(
-                                id: order.id,
-                                tableNumber: order.tableNumber,
-                                orderStatus: order.orderStatus,
-                              ),
+                                  id: order.id,
+                                  tableNumber: order.tableNumber,
+                                  orderStatus: order.orderStatus,
+                                  paymentMethods: order.paymentMethods),
                             ),
                           );
                           if (result == 1) {
