@@ -12,7 +12,7 @@ class OrderRepository implements IOrderRepository {
   //Get all orders
   @override
   Future<List<OrderItem>> getOrders() async {
-    final url = Uri.parse(_baseUrl);
+    final url = Uri.parse('${_baseUrl}?PagingRequest.PageSize=10000000');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await authRepository.getToken()}',
