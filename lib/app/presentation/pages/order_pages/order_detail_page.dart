@@ -33,9 +33,7 @@ class _OrderDetailState extends State<OrderDetailPage> {
     _refreshOrderDetails();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
-        setState(() {
-          _refreshOrderDetails();
-        });
+        _refreshOrderDetails();
       }
     });
   }
