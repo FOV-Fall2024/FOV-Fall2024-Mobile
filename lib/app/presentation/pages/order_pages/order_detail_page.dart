@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/entities/OrderDetail.dart';
 import 'package:fov_fall2024_waiter_mobile_app/app/repositories/data/order_repository.dart';
 import './order_detal_page.component.dart';
@@ -24,11 +25,19 @@ class OrderDetailPage extends StatefulWidget {
 class _OrderDetailState extends State<OrderDetailPage> {
   final OrderRepository orderRepository = OrderRepository();
   late Future<OrderDetail> orderDetailFuture;
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
     super.initState();
     _refreshOrderDetails();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        setState(() {
+          _refreshOrderDetails();
+        });
+      }
+    });
   }
 
   void _refreshOrderDetails() {
